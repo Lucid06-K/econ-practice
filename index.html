@@ -1295,11 +1295,19 @@ function submitAnswer(){
 
   if(isCorrect) quizState.score++;
 
-  // Update state
+  // Update state (avoid double-counting if re-answering same question)
+  const prevAnswer = state.attempted[q.id];
   state.attempted[q.id] = {answered:true, correct:isCorrect, selectedOption:quizState.selectedOption};
   if(!state.topicScores[q.topic]) state.topicScores[q.topic] = {correct:0,attempted:0};
-  state.topicScores[q.topic].attempted++;
-  if(isCorrect) state.topicScores[q.topic].correct++;
+  if(!prevAnswer){
+    // First time answering this question
+    state.topicScores[q.topic].attempted++;
+    if(isCorrect) state.topicScores[q.topic].correct++;
+  } else {
+    // Re-answering: adjust correct count if result changed
+    if(prevAnswer.correct && !isCorrect) state.topicScores[q.topic].correct--;
+    if(!prevAnswer.correct && isCorrect) state.topicScores[q.topic].correct++;
+  }
 
   if(isCorrect){
     state.currentStreak = (state.currentStreak||0)+1;
@@ -1347,9 +1355,8 @@ function nextQuestion(){
 function endQuiz(){
   stopTimer();
   if(!quizState) return;
-  const total = quizState.current + (quizState.submitted ? 0 : -1);
-  const realTotal = Math.max(total+1, quizState.submitted ? quizState.current+1 : quizState.current);
-  const attempted = Object.keys(state.attempted).length;
+  // Count how many questions were actually submitted in this quiz
+  const realTotal = quizState.submitted ? quizState.current + 1 : quizState.current;
   const pct = realTotal > 0 ? Math.round(quizState.score/realTotal*100) : 0;
 
   document.getElementById('quizActive').style.display = 'none';
@@ -1504,8 +1511,18 @@ function shuffleArray(arr){
 }
 
 // ==================== VERSION HISTORY ====================
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.1.1';
 const changelog = [
+  {
+    version: '1.1.1',
+    date: '2026-04-15',
+    title: 'Bug Fixes',
+    changes: [
+      {type:'fixed', text:'Topic scores no longer double-count when re-answering the same question'},
+      {type:'fixed', text:'Re-answering a question now correctly updates correct/incorrect count'},
+      {type:'fixed', text:'End quiz score calculation simplified and fixed for mid-quiz exits'},
+    ]
+  },
   {
     version: '1.1.0',
     date: '2026-04-15',
