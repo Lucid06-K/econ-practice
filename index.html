@@ -395,6 +395,37 @@ input,select{font-family:inherit}
   display:flex;align-items:center;justify-content:center;
   font-size:.75rem;color:var(--text3);flex-shrink:0;
 }
+/* Study mode */
+.study-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.study-nav-btns{display:flex;gap:8px}
+.study-nav-btn{
+  padding:10px 20px;border-radius:var(--radius);font-size:.85rem;font-weight:600;
+  background:var(--bg3);color:var(--text2);border:1px solid var(--border);
+  transition:var(--transition);
+}
+.study-nav-btn:hover:not(:disabled){background:var(--bg4);color:var(--text)}
+.study-nav-btn:disabled{opacity:.3;cursor:not-allowed}
+.study-pos{font-size:.85rem;color:var(--text3);white-space:nowrap}
+.study-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);
+  padding:28px 24px;animation:fadeIn .25s ease;
+}
+.study-card .q-topic{font-size:.7rem;color:var(--green);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.study-card .q-num{font-size:.75rem;color:var(--text3);margin-top:2px;margin-bottom:14px}
+.study-card .q-text{font-size:1.05rem;line-height:1.6;margin-bottom:18px}
+.study-card .study-option{
+  padding:10px 14px;font-size:.9rem;border-radius:var(--radius);margin-bottom:6px;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.study-card .study-option.is-correct{background:rgba(16,185,129,.12);color:#6ee7b7;font-weight:600;border:1px solid rgba(16,185,129,.25)}
+.study-card .study-option .opt-letter{font-weight:700;min-width:14px}
+.study-card .study-explanation{
+  margin-top:14px;padding:12px 16px;background:var(--bg3);
+  border-radius:var(--radius);font-size:.85rem;color:var(--text2);line-height:1.5;
+  border-left:3px solid var(--green);
+}
+.study-keyboard-hint{font-size:.7rem;color:var(--text3);margin-top:12px;text-align:center}
+
 /* Sign-in modal */
 .signin-modal-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;
@@ -471,6 +502,7 @@ input,select{font-family:inherit}
       <button class="nav-btn active" data-page="dashboard"><span class="icon">&#9632;</span>Dashboard</button>
       <button class="nav-btn" data-page="quiz"><span class="icon">&#9998;</span>Quiz Mode<span class="badge" id="navQuizCount">173</span></button>
       <button class="nav-btn" data-page="review"><span class="icon">&#128214;</span>Review Mode</button>
+      <button class="nav-btn" data-page="study"><span class="icon">&#127911;</span>Study Mode</button>
       <button class="nav-btn" data-page="essays"><span class="icon">&#128221;</span>Essay Questions<span class="badge">20</span></button>
     </div>
     <div class="nav-section">
@@ -575,6 +607,24 @@ input,select{font-family:inherit}
       <button class="btn btn-secondary" onclick="showPage('dashboard')">Dashboard</button>
     </div>
   </div>
+</div>
+
+<!-- STUDY MODE PAGE -->
+<div class="page" id="page-study">
+  <div class="page-header">
+    <h2>Study Mode</h2>
+    <p>Browse questions one at a time with answers shown</p>
+  </div>
+  <div class="topic-chips" id="studyTopicChips"></div>
+  <div class="study-nav">
+    <div class="study-nav-btns">
+      <button class="study-nav-btn" id="studyPrevBtn" onclick="studyPrev()" disabled>&#8592; Previous</button>
+      <button class="study-nav-btn" id="studyNextBtn" onclick="studyNext()">Next &#8594;</button>
+    </div>
+    <div class="study-pos" id="studyPos">1 / 173</div>
+  </div>
+  <div id="studyCard"></div>
+  <div class="study-keyboard-hint">Use &#8592; &#8594; arrow keys to navigate</div>
 </div>
 
 <!-- REVIEW PAGE -->
@@ -1182,6 +1232,7 @@ function showPage(page, topic){
       resetQuizUI();
     }
   }
+  if(page==='study') renderStudyMode();
   if(page==='review') renderReview();
   if(page==='essays') renderEssays();
   if(page==='changelog') renderChangelog();
@@ -1474,6 +1525,82 @@ function updateTimerDisplay(){
   el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
   el.classList.toggle('danger', t < 120);
 }
+
+// ==================== STUDY MODE ====================
+let studyState = {questions: [], current: 0};
+
+function renderStudyMode(){
+  const container = document.getElementById('studyTopicChips');
+  container.innerHTML = '<button class="chip active" data-topic="all">All Topics ('+questions.length+')</button>';
+  topics.forEach(t=>{
+    const c = questions.filter(q=>q.topic===t).length;
+    container.innerHTML += `<button class="chip" data-topic="${t}">${t} (${c})</button>`;
+  });
+  container.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      container.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      const topic = chip.dataset.topic;
+      studyState.questions = topic==='all' ? [...questions] : questions.filter(q=>q.topic===topic);
+      studyState.current = 0;
+      renderStudyCard();
+    });
+  });
+  studyState.questions = [...questions];
+  studyState.current = 0;
+  renderStudyCard();
+}
+
+function renderStudyCard(){
+  const qs = studyState.questions;
+  const idx = studyState.current;
+  if(!qs.length){
+    document.getElementById('studyCard').innerHTML = '<div class="card" style="text-align:center;padding:40px;color:var(--text3)">No questions in this topic.</div>';
+    document.getElementById('studyPos').textContent = '0 / 0';
+    return;
+  }
+  const q = qs[idx];
+  document.getElementById('studyPos').textContent = `${idx+1} / ${qs.length}`;
+  document.getElementById('studyPrevBtn').disabled = idx === 0;
+  document.getElementById('studyNextBtn').disabled = idx === qs.length - 1;
+
+  document.getElementById('studyCard').innerHTML = `
+    <div class="study-card">
+      <div class="q-topic">${q.topic}</div>
+      <div class="q-num">Question ${q.id}</div>
+      <div class="q-text">${q.text.replace(/\n/g,'<br>')}</div>
+      ${q.options.map((opt,i)=>`
+        <div class="study-option${i===q.correct?' is-correct':''}">
+          <span class="opt-letter">${letters[i]}.</span>
+          <span>${opt}${i===q.correct?' &#10003;':''}</span>
+        </div>
+      `).join('')}
+      ${q.explanation ? `<div class="study-explanation">${q.explanation}</div>` : ''}
+    </div>
+  `;
+}
+
+function studyPrev(){
+  if(studyState.current > 0){
+    studyState.current--;
+    renderStudyCard();
+  }
+}
+
+function studyNext(){
+  if(studyState.current < studyState.questions.length - 1){
+    studyState.current++;
+    renderStudyCard();
+  }
+}
+
+// Keyboard navigation for study mode
+document.addEventListener('keydown', function(e){
+  const studyPage = document.getElementById('page-study');
+  if(!studyPage.classList.contains('active')) return;
+  if(e.key === 'ArrowLeft') studyPrev();
+  if(e.key === 'ArrowRight') studyNext();
+});
 
 // ==================== REVIEW ====================
 function renderReview(){
