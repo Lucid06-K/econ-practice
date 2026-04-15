@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGRI20042 - Agricultural Economics Practice</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#161822;--bg3:#1e2030;--bg4:#262840;
+  --text:#e2e4f0;--text2:#a0a4c0;--text3:#6b6f8a;
+  --green:#10b981;--green2:#059669;--green3:#047857;--green-glow:rgba(16,185,129,.15);
+  --red:#ef4444;--red-glow:rgba(239,68,68,.12);
+  --amber:#f59e0b;--amber-glow:rgba(245,158,11,.12);
+  --blue:#3b82f6;--blue-glow:rgba(59,130,246,.12);
+  --border:#2a2d42;--border2:#363a54;
+  --radius:10px;--radius2:14px;
+  --shadow:0 4px 24px rgba(0,0,0,.35);
+  --sidebar-w:280px;
+  --transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+a{color:var(--green);text-decoration:none}
+button{cursor:pointer;font-family:inherit;border:none;outline:none}
+input,select{font-family:inherit}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+/* Layout */
+.app{display:flex;min-height:100vh}
+
+/* Sidebar */
+.sidebar{
+  width:var(--sidebar-w);min-width:var(--sidebar-w);
+  background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;
+  z-index:100;transition:transform .3s ease;
+}
+.sidebar-header{
+  padding:20px;border-bottom:1px solid var(--border);
+}
+.sidebar-header h1{font-size:1.1rem;font-weight:700;color:var(--green);letter-spacing:-.02em}
+.sidebar-header p{font-size:.75rem;color:var(--text3);margin-top:4px}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px}
+.nav-section{margin-bottom:8px}
+.nav-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:8px 12px 4px;font-weight:600}
+.nav-btn{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:10px 12px;border-radius:var(--radius);
+  background:transparent;color:var(--text2);font-size:.85rem;
+  transition:var(--transition);text-align:left;
+}
+.nav-btn:hover{background:var(--bg3);color:var(--text)}
+.nav-btn.active{background:var(--green-glow);color:var(--green);font-weight:600}
+.nav-btn .icon{width:20px;text-align:center;font-size:1rem}
+.nav-btn .badge{
+  margin-left:auto;background:var(--bg4);color:var(--text3);
+  font-size:.7rem;padding:2px 7px;border-radius:10px;font-weight:600;
+}
+.nav-btn.active .badge{background:rgba(16,185,129,.2);color:var(--green)}
+.sidebar-footer{padding:16px;border-top:1px solid var(--border)}
+.sidebar-footer button{
+  width:100%;padding:10px;border-radius:var(--radius);
+  background:var(--bg3);color:var(--red);font-size:.8rem;font-weight:600;
+  transition:var(--transition);
+}
+.sidebar-footer button:hover{background:rgba(239,68,68,.12)}
+
+/* Mobile sidebar toggle */
+.menu-toggle{
+  display:none;position:fixed;top:12px;left:12px;z-index:200;
+  width:40px;height:40px;border-radius:var(--radius);
+  background:var(--bg3);color:var(--text);font-size:1.2rem;
+  border:1px solid var(--border);
+  align-items:center;justify-content:center;
+}
+
+/* Main */
+.main{flex:1;margin-left:var(--sidebar-w);min-height:100vh}
+.main-inner{max-width:900px;margin:0 auto;padding:30px 24px}
+.page{display:none;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Page Header */
+.page-header{margin-bottom:28px}
+.page-header h2{font-size:1.6rem;font-weight:700;letter-spacing:-.03em}
+.page-header p{color:var(--text2);margin-top:6px;font-size:.9rem}
+
+/* Cards */
+.card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius2);padding:20px;margin-bottom:16px;
+  transition:var(--transition);
+}
+.card:hover{border-color:var(--border2)}
+
+/* Dashboard */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius2);padding:18px;text-align:center;
+}
+.stat-card .stat-value{font-size:2rem;font-weight:800;color:var(--green)}
+.stat-card .stat-label{font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.stat-card.amber .stat-value{color:var(--amber)}
+.stat-card.blue .stat-value{color:var(--blue)}
+.stat-card.red .stat-value{color:var(--red)}
+
+.topic-progress{margin-top:20px}
+.topic-row{
+  display:flex;align-items:center;gap:12px;padding:12px 16px;
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  margin-bottom:8px;transition:var(--transition);cursor:pointer;
+}
+.topic-row:hover{border-color:var(--green);background:var(--bg3)}
+.topic-row .topic-name{flex:1;font-size:.88rem;font-weight:500}
+.topic-row .topic-score{font-size:.82rem;color:var(--green);font-weight:700;min-width:50px;text-align:right}
+.progress-bar-bg{width:120px;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--green);border-radius:3px;transition:width .4s ease}
+
+/* Quiz */
+.quiz-top-bar{
+  display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;
+}
+.quiz-progress{flex:1;min-width:200px}
+.quiz-progress-text{font-size:.75rem;color:var(--text3);margin-bottom:4px;display:flex;justify-content:space-between}
+.quiz-progress-bar{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.quiz-progress-fill{height:100%;background:var(--green);transition:width .4s ease;border-radius:3px}
+.quiz-timer{
+  font-family:'Courier New',monospace;font-size:1.1rem;font-weight:700;
+  color:var(--amber);background:var(--bg3);padding:6px 14px;border-radius:var(--radius);
+  border:1px solid var(--border);min-width:80px;text-align:center;
+}
+.quiz-timer.danger{color:var(--red);border-color:rgba(239,68,68,.3);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+.question-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);
+  padding:28px;margin-bottom:16px;
+}
+.question-topic{
+  display:inline-block;font-size:.7rem;font-weight:600;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--green);background:var(--green-glow);
+  padding:3px 10px;border-radius:6px;margin-bottom:12px;
+}
+.question-number{font-size:.8rem;color:var(--text3);margin-bottom:8px}
+.question-text{font-size:1.05rem;line-height:1.6;margin-bottom:20px;font-weight:500}
+.options-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.option-item{
+  display:flex;align-items:flex-start;gap:12px;padding:12px 16px;
+  border:1px solid var(--border);border-radius:var(--radius);
+  cursor:pointer;transition:var(--transition);
+}
+.option-item:hover{border-color:var(--border2);background:var(--bg3)}
+.option-item.selected{border-color:var(--green);background:var(--green-glow)}
+.option-item.correct{border-color:var(--green);background:rgba(16,185,129,.12)}
+.option-item.incorrect{border-color:var(--red);background:rgba(239,68,68,.08)}
+.option-item.reveal-correct{border-color:var(--green);background:rgba(16,185,129,.08)}
+.option-radio{
+  width:18px;height:18px;border-radius:50%;border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;
+  transition:var(--transition);
+}
+.option-item.selected .option-radio{border-color:var(--green)}
+.option-item.selected .option-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--green)}
+.option-item.correct .option-radio{border-color:var(--green)}
+.option-item.correct .option-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--green)}
+.option-item.incorrect .option-radio{border-color:var(--red)}
+.option-item.incorrect .option-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--red)}
+.option-letter{font-weight:700;color:var(--text3);min-width:14px}
+.option-text{font-size:.92rem;line-height:1.5}
+
+.feedback{
+  margin-top:16px;padding:14px 18px;border-radius:var(--radius);
+  font-size:.88rem;line-height:1.5;display:none;
+}
+.feedback.correct{display:block;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#6ee7b7}
+.feedback.incorrect{display:block;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#fca5a5}
+.feedback strong{display:block;margin-bottom:4px;font-size:.92rem}
+.feedback .explanation{color:var(--text2);margin-top:6px;font-size:.84rem}
+
+.quiz-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn{
+  padding:10px 22px;border-radius:var(--radius);font-weight:600;font-size:.88rem;
+  transition:var(--transition);display:inline-flex;align-items:center;gap:6px;
+}
+.btn-primary{background:var(--green);color:#000}
+.btn-primary:hover{background:var(--green2);transform:translateY(-1px)}
+.btn-primary:disabled{background:var(--bg4);color:var(--text3);cursor:not-allowed;transform:none}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--bg4);border-color:var(--border2)}
+.btn-danger{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+.btn-sm{padding:6px 14px;font-size:.8rem}
+
+/* Settings */
+.settings-group{margin-bottom:20px}
+.settings-group h3{font-size:.92rem;font-weight:600;margin-bottom:10px;color:var(--text)}
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid var(--border);
+}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:.88rem;color:var(--text2)}
+.toggle{
+  width:44px;height:24px;border-radius:12px;
+  background:var(--bg4);position:relative;cursor:pointer;
+  transition:var(--transition);
+}
+.toggle.active{background:var(--green)}
+.toggle::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:18px;height:18px;border-radius:50%;background:#fff;
+  transition:var(--transition);
+}
+.toggle.active::after{left:23px}
+.select-styled{
+  padding:6px 12px;border-radius:var(--radius);
+  background:var(--bg3);color:var(--text);border:1px solid var(--border);
+  font-size:.85rem;
+}
+
+/* Changelog / Version History */
+.changelog-timeline{position:relative;padding-left:28px}
+.changelog-timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border2)}
+.changelog-entry{position:relative;margin-bottom:28px}
+.changelog-entry::before{
+  content:'';position:absolute;left:-24px;top:6px;
+  width:14px;height:14px;border-radius:50%;border:2px solid var(--green);background:var(--bg);z-index:1;
+}
+.changelog-entry.latest::before{background:var(--green)}
+.changelog-entry .version-header{display:flex;align-items:baseline;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.changelog-entry .version-tag{
+  font-size:1rem;font-weight:700;color:var(--green);
+  background:var(--green-glow);padding:2px 10px;border-radius:6px;
+}
+.changelog-entry.latest .version-tag{background:var(--green);color:#fff}
+.changelog-entry .version-date{font-size:.78rem;color:var(--text3)}
+.changelog-entry .version-title{font-size:.92rem;font-weight:600;color:var(--text);margin-bottom:6px}
+.changelog-entry .change-list{list-style:none;padding:0}
+.changelog-entry .change-list li{
+  font-size:.84rem;color:var(--text2);padding:3px 0;padding-left:22px;position:relative;
+}
+.changelog-entry .change-list li::before{
+  position:absolute;left:0;top:3px;font-size:.78rem;font-weight:700;
+}
+.change-list li.added::before{content:'+ ';color:var(--green)}
+.change-list li.changed::before{content:'~ ';color:var(--amber)}
+.change-list li.fixed::before{content:'* ';color:var(--blue)}
+.change-list li.removed::before{content:'- ';color:var(--red)}
+.change-type-legend{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.change-type-legend span{font-size:.75rem;color:var(--text3);display:flex;align-items:center;gap:4px}
+.change-type-legend span::before{font-weight:700;font-size:.85rem}
+.legend-added::before{content:'+ ';color:var(--green)}
+.legend-changed::before{content:'~ ';color:var(--amber)}
+.legend-fixed::before{content:'* ';color:var(--blue)}
+.legend-removed::before{content:'- ';color:var(--red)}
+
+/* Review */
+.review-item{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);
+  padding:20px;margin-bottom:12px;
+}
+.review-item .q-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.review-item .q-topic{font-size:.7rem;color:var(--green);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.review-item .q-num{font-size:.75rem;color:var(--text3)}
+.review-item .q-text{font-size:.95rem;margin-bottom:12px;line-height:1.5}
+.review-option{
+  padding:6px 12px;font-size:.85rem;border-radius:6px;margin-bottom:4px;
+  display:flex;gap:8px;align-items:flex-start;
+}
+.review-option.is-correct{background:rgba(16,185,129,.1);color:#6ee7b7;font-weight:600}
+.review-option .opt-letter{font-weight:700;min-width:12px}
+.review-explanation{
+  margin-top:10px;padding:10px 14px;background:var(--bg3);
+  border-radius:var(--radius);font-size:.82rem;color:var(--text2);line-height:1.5;
+}
+
+/* Essay */
+.essay-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius2);
+  margin-bottom:12px;overflow:hidden;
+}
+.essay-header{
+  padding:16px 20px;cursor:pointer;display:flex;justify-content:space-between;
+  align-items:center;transition:var(--transition);
+}
+.essay-header:hover{background:var(--bg3)}
+.essay-header h3{font-size:.95rem;font-weight:600}
+.essay-header .arrow{transition:transform .3s ease;color:var(--text3);font-size:1.2rem}
+.essay-card.open .essay-header .arrow{transform:rotate(180deg)}
+.essay-body{
+  max-height:0;overflow:hidden;transition:max-height .4s ease;
+  padding:0 20px;
+}
+.essay-card.open .essay-body{max-height:2000px;padding:0 20px 20px}
+.essay-hint-btn{
+  margin-top:10px;font-size:.82rem;color:var(--amber);background:var(--amber-glow);
+  padding:6px 14px;border-radius:6px;cursor:pointer;display:inline-block;
+  border:1px solid rgba(245,158,11,.2);transition:var(--transition);
+}
+.essay-hint-btn:hover{background:rgba(245,158,11,.2)}
+.essay-hints{
+  margin-top:10px;padding:12px;background:var(--bg3);border-radius:var(--radius);
+  font-size:.84rem;color:var(--text2);line-height:1.6;display:none;
+}
+.essay-hints.show{display:block}
+
+/* Topic filter chips */
+.topic-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.chip{
+  padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:600;
+  background:var(--bg3);color:var(--text2);border:1px solid var(--border);
+  cursor:pointer;transition:var(--transition);
+}
+.chip:hover{border-color:var(--border2);color:var(--text)}
+.chip.active{background:var(--green-glow);color:var(--green);border-color:rgba(16,185,129,.3)}
+
+/* Quiz complete */
+.quiz-complete{text-align:center;padding:40px 20px}
+.quiz-complete .score-circle{
+  width:140px;height:140px;border-radius:50%;
+  border:4px solid var(--green);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;margin:0 auto 20px;
+}
+.quiz-complete .score-circle .pct{font-size:2.4rem;font-weight:800;color:var(--green)}
+.quiz-complete .score-circle .label{font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.quiz-complete h2{font-size:1.4rem;margin-bottom:10px}
+.quiz-complete p{color:var(--text2);margin-bottom:20px}
+
+/* Responsive */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .menu-toggle{display:flex}
+  .main{margin-left:0}
+  .main-inner{padding:60px 16px 24px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .progress-bar-bg{width:80px}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .stat-card{padding:14px}
+  .stat-card .stat-value{font-size:1.5rem}
+}
+
+/* Overlay for mobile sidebar */
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;
+}
+.sidebar-overlay.show{display:block}
+
+/* Quiz start screen */
+.quiz-start{text-align:center;padding:40px 20px}
+.quiz-start h3{font-size:1.2rem;margin-bottom:16px}
+.quiz-start .start-options{
+  display:flex;flex-direction:column;gap:12px;
+  max-width:360px;margin:0 auto 20px;text-align:left;
+}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="menu-toggle" id="menuToggle">&#9776;</button>
+
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h1>AGRI20042</h1>
+    <p>Agricultural Economics</p>
+    <span id="sidebarVersion" style="display:inline-block;margin-top:6px;font-size:.65rem;color:var(--text3);background:var(--bg4);padding:2px 8px;border-radius:6px;cursor:pointer" onclick="showPage('changelog')"></span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-title">Main</div>
+      <button class="nav-btn active" data-page="dashboard"><span class="icon">&#9632;</span>Dashboard</button>
+      <button class="nav-btn" data-page="quiz"><span class="icon">&#9998;</span>Quiz Mode<span class="badge" id="navQuizCount">173</span></button>
+      <button class="nav-btn" data-page="review"><span class="icon">&#128214;</span>Review Mode</button>
+      <button class="nav-btn" data-page="essays"><span class="icon">&#128221;</span>Essay Questions<span class="badge">20</span></button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Topics</div>
+      <button class="nav-btn" data-page="quiz" data-topic="Fundamentals & Scarcity"><span class="icon">&#127793;</span>Fundamentals<span class="badge" id="badge-t0">16</span></button>
+      <button class="nav-btn" data-page="quiz" data-topic="Micro vs Macro Economics"><span class="icon">&#128200;</span>Micro vs Macro<span class="badge" id="badge-t1">8</span></button>
+      <button class="nav-btn" data-page="quiz" data-topic="Opportunity Cost & Sunk Costs"><span class="icon">&#9878;</span>Opportunity Cost<span class="badge" id="badge-t2">20</span></button>
+      <button class="nav-btn" data-page="quiz" data-topic="PPF & Production"><span class="icon">&#128200;</span>PPF & Production<span class="badge" id="badge-t3">5</span></button>
+      <button class="nav-btn" data-page="quiz" data-topic="Positive vs Normative & Economic Reasoning"><span class="icon">&#128161;</span>Pos. vs Norm.<span class="badge" id="badge-t4">18</span></button>
+      <button class="nav-btn" data-page="quiz" data-topic="Markets & Competition"><span class="icon">&#127970;</span>Markets<span class="badge" id="badge-t5">16</span></button>
+      <button class="nav-btn" data-page="quiz" data-topic="Supply & Demand"><span class="icon">&#128202;</span>Supply & Demand<span class="badge" id="badge-t6">18</span></button>
+      <button class="nav-btn" data-page="quiz" data-topic="Elasticity"><span class="icon">&#128203;</span>Elasticity<span class="badge" id="badge-t7">35</span></button>
+      <button class="nav-btn" data-page="quiz" data-topic="Costs of Production"><span class="icon">&#127981;</span>Costs<span class="badge" id="badge-t8">11</span></button>
+      <button class="nav-btn" data-page="quiz" data-topic="Profit Maximization"><span class="icon">&#128176;</span>Profit Max<span class="badge" id="badge-t9">13</span></button>
+      <button class="nav-btn" data-page="quiz" data-topic="Government Intervention"><span class="icon">&#127963;</span>Gov. Intervention<span class="badge" id="badge-t10">10</span></button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Settings</div>
+      <button class="nav-btn" data-page="changelog"><span class="icon">&#128240;</span>Version History</button>
+      <button class="nav-btn" data-page="settings"><span class="icon">&#9881;</span>Settings</button>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <button id="resetBtn">Reset All Progress</button>
+  </div>
+</aside>
+
+<main class="main">
+<div class="main-inner">
+
+<!-- DASHBOARD PAGE -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <h2>Dashboard</h2>
+    <p>Your AGRI20042 exam preparation overview</p>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value" id="statAttempted">0</div><div class="stat-label">Questions Attempted</div></div>
+    <div class="stat-card"><div class="stat-value" id="statCorrect">0</div><div class="stat-label">Correct Answers</div></div>
+    <div class="stat-card amber"><div class="stat-value" id="statAccuracy">0%</div><div class="stat-label">Accuracy</div></div>
+    <div class="stat-card blue"><div class="stat-value" id="statStreak">0</div><div class="stat-label">Best Streak</div></div>
+  </div>
+  <h3 style="font-size:1rem;margin-bottom:14px;color:var(--text2)">Progress by Topic</h3>
+  <div id="topicProgressList" class="topic-progress"></div>
+</div>
+
+<!-- QUIZ PAGE -->
+<div class="page" id="page-quiz">
+  <div class="page-header">
+    <h2>Quiz Mode</h2>
+    <p id="quizSubtitle">Test your knowledge one question at a time</p>
+  </div>
+
+  <!-- Quiz Start Screen -->
+  <div id="quizStart" class="quiz-start">
+    <h3>Select a Topic to Begin</h3>
+    <div class="topic-chips" id="quizTopicChips"></div>
+    <div class="start-options">
+      <div class="setting-row">
+        <span class="setting-label">Shuffle Questions</span>
+        <div class="toggle" id="toggleShuffle" onclick="this.classList.toggle('active')"></div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Timer (MCQ: 20 min)</span>
+        <div class="toggle" id="toggleTimer" onclick="this.classList.toggle('active')"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="startQuizBtn" style="margin-top:10px">Start Quiz</button>
+  </div>
+
+  <!-- Quiz Active -->
+  <div id="quizActive" style="display:none">
+    <div class="quiz-top-bar">
+      <div class="quiz-progress">
+        <div class="quiz-progress-text">
+          <span id="quizPosText">Question 1 of 10</span>
+          <span id="quizScoreText">Score: 0/0</span>
+        </div>
+        <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill"></div></div>
+      </div>
+      <div class="quiz-timer" id="quizTimerDisplay" style="display:none">20:00</div>
+      <button class="btn btn-secondary btn-sm" id="endQuizBtn">End Quiz</button>
+    </div>
+    <div id="questionContainer"></div>
+    <div class="quiz-actions">
+      <button class="btn btn-primary" id="submitAnswerBtn" disabled>Submit Answer</button>
+      <button class="btn btn-secondary" id="nextQuestionBtn" style="display:none">Next Question &rarr;</button>
+    </div>
+  </div>
+
+  <!-- Quiz Complete -->
+  <div id="quizComplete" style="display:none" class="quiz-complete">
+    <div class="score-circle">
+      <div class="pct" id="finalPct">0%</div>
+      <div class="label">Score</div>
+    </div>
+    <h2 id="finalMsg">Quiz Complete!</h2>
+    <p id="finalDetail">You answered 0 out of 0 correctly.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="resetQuizUI()">New Quiz</button>
+      <button class="btn btn-secondary" onclick="showPage('review')">Review Answers</button>
+      <button class="btn btn-secondary" onclick="showPage('dashboard')">Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW PAGE -->
+<div class="page" id="page-review">
+  <div class="page-header">
+    <h2>Review Mode</h2>
+    <p>All questions with answers revealed</p>
+  </div>
+  <div class="topic-chips" id="reviewTopicChips"></div>
+  <div id="reviewList"></div>
+</div>
+
+<!-- ESSAYS PAGE -->
+<div class="page" id="page-essays">
+  <div class="page-header">
+    <h2>Essay Questions</h2>
+    <p>Practice essay prompts for exam preparation</p>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+    <button class="btn btn-secondary btn-sm" id="essayTimerBtn">Start Essay Timer (40 min)</button>
+    <div class="quiz-timer" id="essayTimerDisplay" style="display:none">40:00</div>
+    <button class="btn btn-danger btn-sm" id="essayTimerStop" style="display:none" onclick="stopEssayTimer()">Stop</button>
+  </div>
+  <div id="essayList"></div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<!-- VERSION HISTORY PAGE -->
+<div class="page" id="page-changelog">
+  <div class="page-header">
+    <h2>Version History</h2>
+    <p>Track changes and updates to the practice app</p>
+  </div>
+  <div id="currentVersionBanner" class="card" style="border-left:4px solid var(--green);margin-bottom:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div>
+      <span style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)">Current Version</span>
+      <div id="currentVersionNum" style="font-size:1.4rem;font-weight:700;color:var(--green)"></div>
+    </div>
+    <div style="margin-left:auto;text-align:right">
+      <span style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)">Released</span>
+      <div id="currentVersionDate" style="font-size:.9rem;color:var(--text2)"></div>
+    </div>
+  </div>
+  <div id="changelogTimeline" class="changelog-timeline"></div>
+</div>
+
+<div class="page" id="page-settings">
+  <div class="page-header">
+    <h2>Settings</h2>
+    <p>Configure your practice experience</p>
+  </div>
+  <div class="card">
+    <div class="settings-group">
+      <h3>Quiz Settings</h3>
+      <div class="setting-row">
+        <span class="setting-label">Shuffle questions by default</span>
+        <div class="toggle" id="settingShuffle" onclick="toggleSetting(this,'shuffle')"></div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Enable timer by default</span>
+        <div class="toggle" id="settingTimer" onclick="toggleSetting(this,'timer')"></div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">MCQ Timer Duration</span>
+        <select class="select-styled" id="settingMcqTime" onchange="saveSetting('mcqTime',this.value)">
+          <option value="600">10 minutes</option>
+          <option value="1200" selected>20 minutes</option>
+          <option value="1800">30 minutes</option>
+          <option value="2400">40 minutes</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Essay Timer Duration</span>
+        <select class="select-styled" id="settingEssayTime" onchange="saveSetting('essayTime',this.value)">
+          <option value="1200">20 minutes</option>
+          <option value="2400" selected>40 minutes</option>
+          <option value="3600">60 minutes</option>
+        </select>
+      </div>
+    </div>
+    <div class="settings-group">
+      <h3>Data</h3>
+      <div class="setting-row">
+        <span class="setting-label">Clear all progress and scores</span>
+        <button class="btn btn-danger btn-sm" onclick="resetAll()">Reset All Data</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</main>
+</div>
+
+<script>
+// ==================== QUESTION DATA ====================
+const questions = [
+  // FUNDAMENTALS & SCARCITY
+  {id:1,topic:"Fundamentals & Scarcity",text:"Economics is best defined as the study of how people, businesses, governments, and societies:",options:["make choices to cope with scarcity.","attain wealth.","choose abundance over scarcity.","use their infinite resources."],correct:0},
+  {id:2,topic:"Fundamentals & Scarcity",text:"The most fundamental economic problem is:",options:["security.","the fact that the United States buys more goods from foreigners than we sell to foreigners.","health.","scarcity."],correct:3},
+  {id:3,topic:"Fundamentals & Scarcity",text:"Scarcity requires that people must:",options:["trade.","compete.","cooperate.","make choices."],correct:3},
+  {id:4,topic:"Fundamentals & Scarcity",text:"The problem of scarcity:",options:["Exists only in times of economic depression for rich countries.","Is identical to poverty.","Exists in all economies.","Can be eliminated by allocating available resources to the poorer sections of a society."],correct:2},
+  {id:5,topic:"Fundamentals & Scarcity",text:"Human capital is:",options:["machinery that meets or exceeds federal safety standards for use by humans.","all capital owned by individuals or corporations, but not by governments.","the skill and knowledge of workers.","all capital owned by individuals, but not by corporations or governments."],correct:2},
+  {id:6,topic:"Fundamentals & Scarcity",text:"Entrepreneurs do all of the following EXCEPT:",options:["bear risk from business decisions.","own all the other resources.","come up with new ideas about what, how, when, and where to produce.","organize labour, land, and capital."],correct:1},
+  {id:7,topic:"Fundamentals & Scarcity",text:"As an economic concept, scarcity applies to:",options:["neither time nor money.","both money and time.","time but not money.","money but not time."],correct:1},
+  {id:8,topic:"Fundamentals & Scarcity",text:"Economists point out that scarcity confronts:",options:["the rich but not the poor.","the poor but not the rich.","both the poor and the rich.","neither the poor nor the rich."],correct:2},
+  {id:9,topic:"Fundamentals & Scarcity",text:"Scarcity is a situation in which:",options:["something is being wasted.","long lines form at gas stations.","some people are poor, and others are rich.","we are unable to satisfy all our wants."],correct:3},
+  {id:10,topic:"Fundamentals & Scarcity",text:"Which of the following is not a factor of production?",options:["Land","Labour","Money","Capital"],correct:2},
+  {id:11,topic:"Fundamentals & Scarcity",text:"Making a choice at the margin means:",options:["making a choice by comparing the total benefit and the total cost.","deciding to do a little bit more or a little bit less of an activity.","waiting until the last minute to make a choice.","letting someone else choose for you."],correct:1},
+  {id:12,topic:"Fundamentals & Scarcity",text:"Who wrote The Wealth of Nations?",options:["Adam Smith","Ron Barassi","Saint Augustine","Karl Marx"],correct:0},
+  {id:13,topic:"Fundamentals & Scarcity",text:"The birth of economics as an intellectual discipline can be dated fairly precisely in the eighteenth century with:",options:["the publication of the book, The Wealth of Nations.","the opening of the London stock exchange.","the development of the factory system.","the introduction of paper currency."],correct:0},
+  {id:14,topic:"Fundamentals & Scarcity",text:"An incentive:",options:["is the opposite of a tradeoff.","could be a reward but could not be a penalty.","could be either a reward or a penalty.","could be a penalty but could not be a reward."],correct:2},
+  {id:15,topic:"Fundamentals & Scarcity",text:"If the cost of a computer falls by a large amount, you have an incentive to:",options:["use your friend's computer rather than buy one yourself.","avoid buying a new computer because it is now less valuable.","take a shorter vacation.","buy a new computer."],correct:3},
+  {id:16,topic:"Fundamentals & Scarcity",text:"Economic decisions are based on:",options:["relative prices of inputs and of outputs.","absolute prices of everything.","constant-quality prices.","economic prices in the nearest market."],correct:0},
+
+  // MICRO VS MACRO
+  {id:17,topic:"Micro vs Macro Economics",text:"Which of the following is a macroeconomic topic?",options:["why plumbers earn more than janitors.","the reasons for the rise in average prices.","whether the army should buy more tanks or more rockets.","the reasons for a rise in the price of orange juice."],correct:1},
+  {id:18,topic:"Micro vs Macro Economics",text:"Which of the following is a microeconomic topic?",options:["the reasons for a decline in average prices.","the reasons why Kathy buys less orange juice.","the cause of why total employment may decrease.","the effect of the government budget deficit on inflation."],correct:1},
+  {id:19,topic:"Micro vs Macro Economics",text:"Microeconomics focuses on all of the following, EXCEPT:",options:["the effect of increasing the money supply on inflation.","the purchasing decisions that an individual consumer makes.","the effect of an increase in the tax on cigarettes on cigarette sales.","the hiring decisions that a business makes."],correct:0},
+  {id:20,topic:"Micro vs Macro Economics",text:"In broad terms the difference between microeconomics and macroeconomics is that:",options:["microeconomics studies the effects of government taxes on the national unemployment rate.","macroeconomics studies the effects of government regulation and taxes on the price of individual goods and services whereas microeconomics does not.","they use different sets of tools and ideas.","microeconomics studies decisions of individual people and firms and macroeconomics studies the entire national economy."],correct:3},
+  {id:21,topic:"Micro vs Macro Economics",text:"Studying the determination of prices in individual markets is primarily a concern of:",options:["negative economics.","microeconomics.","positive economics.","macroeconomics."],correct:1},
+  {id:22,topic:"Micro vs Macro Economics",text:"The analysis of the behavior of individual decision-making units is the definition of:",options:["microeconomics.","macroeconomics.","positive economics.","normative economics."],correct:0},
+  {id:23,topic:"Micro vs Macro Economics",text:"Which of the following is a macroeconomic issue?",options:["how federal government budget deficits affect interest rates.","the cause of a decline in the price of peanut butter.","what determines the amount a firm will produce.","how a rise in the price of sugar affects the market for sodas."],correct:0},
+  {id:24,topic:"Micro vs Macro Economics",text:"Macroeconomics is the branch of economics that studies:",options:["prices of individual goods.","important, as opposed to trivial, issues.","the way individual markets work.","the economy as a whole."],correct:3},
+
+  // OPPORTUNITY COST & SUNK COSTS
+  {id:25,topic:"Opportunity Cost & Sunk Costs",text:"Your aunt is thinking about opening a hardware store. She estimates that it would cost $1,000,000 per year to rent the store and buy the stock and run the shop. In addition, she would have to quit her $200,000 per year job as an accountant. Your aunt's total cost of running the store is:",options:["$1,000,000","$1,200,000","$200,000","$0"],correct:1,explanation:"Total cost = explicit costs ($1,000,000) + opportunity cost of forgone salary ($200,000) = $1,200,000."},
+  {id:26,topic:"Opportunity Cost & Sunk Costs",text:"The opportunity cost of something you decide to get is:",options:["the amount of money you pay to get it.","the alternative you give up, to get that you place the highest value on.","the lowest valued alternative you give up, to get it.","all possible alternatives that you give up, to get it."],correct:1},
+  {id:27,topic:"Opportunity Cost & Sunk Costs",text:"During the summer you have made the decision to attend summer school, which precludes you from working at your usual summer job in which you normally earn $6,000 for the summer. Your tuition cost is $3,000, books and supplies cost $300, and room and board cost $1,000. The opportunity cost of attending summer school is:",options:["$3,300","$4,300","$6,000","$10,300"],correct:3,explanation:"Total opportunity cost = forgone wages ($6,000) + tuition ($3,000) + books ($300) + room and board ($1,000) = $10,300."},
+  {id:28,topic:"Opportunity Cost & Sunk Costs",text:'The term "opportunity cost" points out that:',options:["there may be such a thing as a free lunch.","executives do not always recognize opportunities for profit as quickly as they should.","any decision regarding the use of a resource involves a costly choice.","not all individuals will make the most of life's opportunities because some will fail to achieve their goals."],correct:2},
+  {id:29,topic:"Opportunity Cost & Sunk Costs",text:"When the government chooses to use resources to build a dam, these resources are no longer available to build a highway. This choice illustrates the concept of:",options:["a market mechanism.","a fallacy of composition.","opportunity cost.","macroeconomics."],correct:2},
+  {id:30,topic:"Opportunity Cost & Sunk Costs",text:"Suppose that you are willing to pay $50 to see a movie on Saturday night. A ticket costs $25, and the next-best alternative use of your time would be to go to dinner with a friend. The cost of the dinner is $30 and you value the experience of having dinner with your friend at $60. The opportunity cost of going out to have dinner with your friend instead of going to the movie is equal to:",options:["$30.","$50.","$25.","$20."],correct:2,explanation:"Opportunity cost of dinner = what you give up from the movie = consumer surplus from movie = $50 - $25 = $25."},
+  {id:31,topic:"Opportunity Cost & Sunk Costs",text:"I am considering loaning my brother $1m for one year. He has agreed to pay 7% interest on the loan. If I don't loan my brother the $1m, it will stay in my bank account for the year, where it will earn 5% interest. What is the opportunity cost to me of lending the $1m to my brother?",options:["$70,000.","$20,000.","$1m.","$50,000."],correct:3,explanation:"The opportunity cost is the forgone bank interest = 5% \u00d7 $1,000,000 = $50,000."},
+  {id:32,topic:"Opportunity Cost & Sunk Costs",text:"As a member of a University Club, at the start of the year I pay $2000 per year up front in membership fees. In a typical month when I go to the Club I spend about $100 on beer. Every month I also have the option of attending a meeting of the whiskey club (open only to Club members) at a cost per meeting of $85, payable at the beginning of each meeting. Given this, what do my annual SUNK COSTS equal?",options:["$100.","$2185.","$2000.","$185."],correct:2,explanation:"Only the membership fee ($2,000) is sunk \u2014 it's already paid and cannot be recovered. Beer and whiskey club costs are future variable costs."},
+  {id:33,topic:"Opportunity Cost & Sunk Costs",text:"On Saturday morning, you rank your choices for activities in the following order: go to the library, work out at the gym, have breakfast with friends, and sleep late. Suppose you decide to go to the library. Your opportunity cost is:",options:["working out at the gym, having breakfast with friends, and sleeping late.","zero because you do not have to pay money to use the library.","working out at the gym.","not clear because not enough information is given."],correct:2,explanation:"Opportunity cost is the highest-valued alternative forgone, which is the next-best option: working out at the gym."},
+  {id:34,topic:"Opportunity Cost & Sunk Costs",text:"From 8 to 11 p.m., Sam can either attend a basketball game, a hockey match, or the symphony. Suppose that Sam decides to attend the hockey match and thinks to herself that if she did not go to the match she would go to the symphony. Then the opportunity cost of attending the hockey match is:",options:["going to the basketball game.","going to the symphony and the basketball game.","three hours of time.","going to the symphony."],correct:3},
+  {id:35,topic:"Opportunity Cost & Sunk Costs",text:"Which of the following is NOT an example of an opportunity cost?",options:["Because David used all of his vacation time to paint his house, he was unable to visit the Caribbean last year.","By choosing to attend college, Jean was not able to continue working as an electrician; she gave up more than $85,000 in earnings.","Because Mary is now being paid a higher wage, she can afford to buy a new car even though she is moving into a bigger apartment.","By spending Thursday night studying for an economics exam, a student was unable to complete a homework assignment for calculus class."],correct:2},
+  {id:36,topic:"Opportunity Cost & Sunk Costs",text:"Opportunity cost means:",options:["the accounting cost minus the marginal benefit.","the highest-valued alternative forgone.","the monetary costs of an activity.","the accounting cost minus the marginal cost."],correct:1},
+  {id:37,topic:"Opportunity Cost & Sunk Costs",text:"The ultimate cost of any choice is:",options:["the dollars expended.","what someone else would be willing to pay.","the after-tax cost.","the highest-valued alternative forgone."],correct:3},
+  {id:38,topic:"Opportunity Cost & Sunk Costs",text:'When an action is chosen, the highest-valued alternative NOT chosen is called the:',options:["accounting cost.","opportunity cost.","implicit cost.","explicit cost."],correct:1},
+  {id:39,topic:"Opportunity Cost & Sunk Costs",text:"Your aunt is thinking about opening a hardware store. She estimates that it would cost $2,000,000 per year to rent the store and buy the stock and run the shop. In addition, she would have to quit her $300,000 per year job as an accountant. Your aunt's total cost of running the store is:",options:["$2,000,000","$2,300,000","$300,000","$0"],correct:1,explanation:"Total cost = explicit costs ($2,000,000) + opportunity cost of forgone salary ($300,000) = $2,300,000."},
+  {id:40,topic:"Opportunity Cost & Sunk Costs",text:"Suppose you play a round of golf costing $125. The golf takes four hours to play. If you were not playing golf you could be working for four hours and earning $60 per hour. The opportunity cost of your golf game is:",options:["$365.","$115.","$240.","$125."],correct:0,explanation:"$125 (golf fee) + 4 \u00d7 $60 (forgone wages) = $125 + $240 = $365."},
+  {id:41,topic:"Opportunity Cost & Sunk Costs",text:"You have decided to attend summer school, which prevents you from working at your usual summer job in which you normally earn $10,000 for the summer. Your tuition cost for the summer school is $5,000, books and supplies cost $500, and room and board cost $3,000. The opportunity cost of attending summer school is:",options:["$8,500.","$18,500","$10,000.","$10,300."],correct:1,explanation:"$10,000 (forgone wages) + $5,000 (tuition) + $500 (books) + $3,000 (room/board) = $18,500."},
+  {id:42,topic:"Opportunity Cost & Sunk Costs",text:'In January, in an attempt to commit to getting fit, I signed a year-long, binding contract at a local gym, agreeing to pay $60 per month in membership fees. I also spent $500 on extremely stylish gym clothes. This morning, I was trying to decide whether or not to actually go to the gym. Which of the following was relevant to this decision?',options:["The $60 that I paid the gym this month.","The $500 I spent on gym clothes.","The fact that I had to do an Ag. Economics mid-term test later today.","All of the above were relevant."],correct:2,explanation:"The membership and gym clothes are sunk costs \u2014 irrelevant to the current decision. Only the opportunity cost of time (the test) matters."},
+  {id:43,topic:"Opportunity Cost & Sunk Costs",text:"Which of the following statements about sunk costs is FALSE?",options:["Sunk costs are those that cannot be recovered, no matter what future action is taken.","Because sunk costs cannot be recovered, they are irrelevant for future decision-making.","The presence of sunk costs can affect future decision-making if they are large enough and so should be considered when making a decision that involves them."],correct:2,explanation:"This statement is FALSE because sunk costs should NEVER affect future decisions, regardless of their size."},
+  {id:44,topic:"Opportunity Cost & Sunk Costs",text:"Suppose that you are willing to pay $60 to see a really good movie on Saturday night. A ticket costs $30, and the next-best alternative use of your time would be to go to dinner with a friend. The cost of the dinner is $40 and you value the experience of having dinner with your friend at $75. The opportunity cost of going out to have dinner with your friend instead of going to the movie is equal to:",options:["$30","$50","$25","$20"],correct:0,explanation:"Opportunity cost of dinner = consumer surplus from movie = $60 - $30 = $30."},
+
+  // PPF & PRODUCTION
+  {id:45,topic:"PPF & Production",text:"A point located inside the Production Possibilities Frontier is:",options:["efficient and attainable.","attainable but not efficient.","efficient, but not attainable.","neither efficient nor attainable."],correct:1},
+  {id:46,topic:"PPF & Production",text:"In the graph of a Production Possibilities Frontier, there are:",options:["inputs on both axes.","input on the x-axis, and output on the y-axis.","outputs on both axes.","output on the x-axis, and input on the y-axis."],correct:2},
+  {id:47,topic:"PPF & Production",text:"A position precisely on a production possibilities frontier:",options:["represents the maximum inefficient use of resources.","is where production is least efficient.","is where good firms make the supernormal profit.","is where resources are used technically efficiently."],correct:3},
+  {id:48,topic:"PPF & Production",text:"Economic growth is represented on a PPF by:",options:["movement along the PPF.","shift in the PPF inwards towards the axis.","shift in the PPF outward from the axis."],correct:2},
+  {id:49,topic:"PPF & Production",text:"Which of the following will not shift a country's production possibilities frontier outward?",options:["Increase in capital stock.","New technology that increases output.","Increase in labour supply.","Reduction in unemployment."],correct:3,explanation:"Reduction in unemployment moves the economy from inside the PPF to ON the PPF, but doesn't shift the frontier itself."},
+
+  // POSITIVE VS NORMATIVE & ECONOMIC REASONING
+  {id:50,topic:"Positive vs Normative & Economic Reasoning",text:"A positive statement is:",options:["always true.","one that does not use the ceteris paribus clause.","about what is.","about what ought to be."],correct:2},
+  {id:51,topic:"Positive vs Normative & Economic Reasoning",text:"Positive and normative statements differ in that:",options:['normative statements depict "what ought to be" and positive statements depict "what is."',"positive statements can be graphed, whereas normative statements cannot.","normative statements can be tested, whereas positive statements cannot.","positive statements can be tested, whereas normative statements cannot."],correct:0},
+  {id:52,topic:"Positive vs Normative & Economic Reasoning",text:"Which of the following is a positive statement?",options:["A 10 percent increase in income leads to a 4 percent increase in the consumption of beef.","My economics class should last for two terms because it is my favourite class.","Given their negative impact on productivity, the government should eliminate labour unions.","Taxes should be lower because then people get to keep more of what they earn."],correct:0},
+  {id:53,topic:"Positive vs Normative & Economic Reasoning",text:"Which of the following is a normative statement?",options:["The price of candy bars is $1.25 each.","Popcorn and candy are sold in movie theaters.","Candy bars are more expensive than newspapers.","You should eat less candy."],correct:3},
+  {id:54,topic:"Positive vs Normative & Economic Reasoning",text:'"The unemployment rate is too high" is:',options:["a positive statement.","a testable hypothesis.","a normative statement.","a factual observation."],correct:2},
+  {id:55,topic:"Positive vs Normative & Economic Reasoning",text:"Which of the following is a normative statement?",options:["printing too much money will cause inflation.","economic growth reduces unemployment.","income distribution in the economy should be fairer.","if prices of a good or service fall people will buy more."],correct:2},
+  {id:56,topic:"Positive vs Normative & Economic Reasoning",text:'"Government should act to reduce poverty levels" is:',options:["an example of the fallacy of composition.","an example of the post hoc fallacy.","a normative statement.","a positive statement."],correct:2},
+  {id:57,topic:"Positive vs Normative & Economic Reasoning",text:"Which of the following is a positive statement?",options:["Low rents will restrict the supply of housing.","Housing costs too much.","Low rents are good because they make apartments more affordable.","Owners of apartment buildings ought to be free to charge whatever rent they want."],correct:0},
+  {id:58,topic:"Positive vs Normative & Economic Reasoning",text:'"Prices rise more in countries with rapid growth in the money supply" is:',options:["an ethical statement.","a normative statement.","a political statement.","a positive statement."],correct:3},
+  {id:59,topic:"Positive vs Normative & Economic Reasoning",text:"Ceteris paribus is the Latin expression for:",options:["a statement about the way the economic world ought to be.",'an expression that means "other things being equal."',"the (false) statement that what is true of the parts is true of the whole.","the error of reasoning that a first event causes a second event because the first event occurred before the second event."],correct:1},
+  {id:60,topic:"Positive vs Normative & Economic Reasoning",text:"The fallacy of composition is the false belief that:",options:["what is true for the parts is also true for the whole.","the ceteris paribus condition does not apply.","because event A occurred before event B, event A caused event B.","because event A occurred after event B, event A caused event B."],correct:0},
+  {id:61,topic:"Positive vs Normative & Economic Reasoning",text:"The post hoc fallacy is the:",options:["assertion that what is true for parts of the whole must be true for the whole.","incorrect use of ceteris paribus in order to study the impact of one factor.","claim that normative statements are less important than positive statements.","claim that one event caused another because the one event came first."],correct:3},
+  {id:62,topic:"Positive vs Normative & Economic Reasoning",text:"A rooster crows and then the sun rises. The rooster thinks that the sun rises because he crows. The rooster falls prey to:",options:["the fallacy of composition.","his self-interest.","marginal thinking.","the post hoc fallacy."],correct:3},
+  {id:63,topic:"Positive vs Normative & Economic Reasoning",text:'"Every time I go to a basketball game, our team wins." This statement is an example of:',options:["a normative economic statement.","fallacy of composition.","post hoc fallacy.","ceteris paribus fallacy."],correct:2},
+  {id:64,topic:"Positive vs Normative & Economic Reasoning",text:"The fallacy of composition is evident in which of the following statements?",options:['"What is bad for the Joneses is bad for the Smiths."','"X and Y go together, therefore X has caused Y."','"If each farmer works harder, all farmers will be richer."','"Technological progress helps everybody."'],correct:2},
+  {id:65,topic:"Positive vs Normative & Economic Reasoning",text:"Economic models:",options:["are essentially different from those used in other sciences.","include all relevant facts.","always use graphs.","simplify reality."],correct:3},
+  {id:66,topic:"Positive vs Normative & Economic Reasoning",text:"Three steps that economists take to discover how the economic world works are:",options:["model building; speculation; and, revision.","observation and measurement; model building; and, testing models.","data mining; data testing; and, drawing conclusions.","speculation; observation and measurement; and, drawing conclusions."],correct:1},
+  {id:67,topic:"Positive vs Normative & Economic Reasoning",text:"The task of economic science is to:",options:["tell us what is good for us.","help us understand how the economic world works.","make moral choices about things like drugs.","save the earth from the overuse of natural resources."],correct:1},
+
+  // MARKETS & COMPETITION
+  {id:68,topic:"Markets & Competition",text:"To a large extent, economists have concluded that competitive markets:",options:["make efficient use of society's scarce resources.","make inefficient use of society's scarce resources.","operate most efficiently with government intervention.","operate most efficiently when the price is regulated by the government."],correct:0},
+  {id:69,topic:"Markets & Competition",text:"Adam Smith argued that an 'invisible hand' leads individuals to:",options:["promote unintentionally beneficial societal outcomes.","to promote their own best individual outcomes.","achieve societal outcomes that makes everyone equally well off.","all pay their taxes."],correct:0},
+  {id:70,topic:"Markets & Competition",text:"In a market economy, resources are allocated by:",options:["prices of inputs and outputs.","whoever is in charge.","an elected group of officials.","lottery."],correct:0},
+  {id:71,topic:"Markets & Competition",text:"In a market economy:",options:["Goods and services and resources are allocated by producers and consumers responding to prices, relative prices, and changes in prices.","the government allocates goods and services and resources.","all of peoples need and wants are fully met by private firms."],correct:0},
+  {id:72,topic:"Markets & Competition",text:"Homogeneous products are:",options:["products that look different but taste similar.","products that are good for you.","products that are not differentiated in the market.","products that are different and have their own brands."],correct:2},
+  {id:73,topic:"Markets & Competition",text:"In the basic competitive model, economists assume several things. Which of these is not one of them?",options:["individuals and firms have perfect information.","one person's consumption of a good prevents someone else's consumption of that good.","competitive markets achieve efficient and equitable outcomes.","individuals and firms take market prices as given."],correct:2},
+  {id:74,topic:"Markets & Competition",text:"The perfectly competitive firm has no control over its:",options:["output.","costs.","price.","use of inputs."],correct:2},
+  {id:75,topic:"Markets & Competition",text:"The market structure in which there is a single seller of a product with no good substitutes is called:",options:["monopolistic competition.","monopoly.","perfect competition.","oligopoly."],correct:1},
+  {id:76,topic:"Markets & Competition",text:"A perfectly competitive firm is a price taker because:",options:["it has a relatively large degree of control over price.","it has been able to differentiate its product from others.","there are a small number of firms in the industry.","it produces a very small percentage of total output."],correct:3},
+  {id:77,topic:"Markets & Competition",text:"In what sense is a monopolist's output viewed by economists as too low?",options:["there is excess demand for the product.","the profit-maximising output is less than the equilibrium level.","the profit-maximising output is below what a perfectly competitive industry would produce.","at the profit-maximising output, the monopolist cannot make a profit."],correct:2},
+  {id:78,topic:"Markets & Competition",text:"Collusion occurs when:",options:["each firm informs the other firms what its price and quantity will be.","firms all charge the same price and produce the same quantity.","firms cooperate in an attempt to maximize their collective profits.","firms behave independently of each other."],correct:2},
+  {id:79,topic:"Markets & Competition",text:"An example of a cartel is:",options:["a motel.","the automobile industry in the US.","OPEC.","none of the above."],correct:2},
+  {id:80,topic:"Markets & Competition",text:"A cartel is an agreement among firms whereby they:",options:["collectively increase output and reduce price.","charge different prices to different consumers for the same product.","coordinate their decisions to maximise their joint profits.","charge the same prices to the same consumers for different products."],correct:2},
+  {id:81,topic:"Markets & Competition",text:"In a competitive industry equilibrium:",options:["firms earn zero economic profits.","firms earn positive economic profits.","cannot tell what level profits are.","firms face a shortage of the good."],correct:0},
+  {id:82,topic:"Markets & Competition",text:"Positive profits above normal profits \u2014 called economic profits \u2014 result in:",options:["increased sales.","increased entry by other firms into the industry.","increased costs.","increased consolidation of firms in an industry."],correct:1},
+  {id:83,topic:"Markets & Competition",text:"In a competitive industry, the demand facing an individual firm is:",options:["perfectly elastic.","inelastic.","relatively elastic.","perfectly inelastic."],correct:0},
+
+  // SUPPLY & DEMAND
+  {id:84,topic:"Supply & Demand",text:"The concept of supply refers to the quantity of a good that firms:",options:["need to sell if they are to make positive profits.","are able to sell in the marketplace.","would like to sell at a given price.","would buy at a given price."],correct:2},
+  {id:85,topic:"Supply & Demand",text:"Demand curves slope downward, which means:",options:["the marginal unit purchased is valued more highly than previous units.","marginal utility is increasing as more units are purchased.","the marginal unit purchased is valued less highly than previous units.","willingness to pay for an additional unit increases with the number of units purchased."],correct:2},
+  {id:86,topic:"Supply & Demand",text:"An individual's demand curve normally slopes downwards because of:",options:["the operation of the principle of diminishing marginal returns.","the operation of the principle of diminishing marginal utility.","the operation of the principle of increasing marginal returns.","the operation of the principle of increasing marginal utility."],correct:1},
+  {id:87,topic:"Supply & Demand",text:"The market demand curve for wheat is derived by:",options:["the global supply and demand for wheat.","the horizontal summation of all individual wheat demand curves in the market.","the Chicago Board of Trade.","the physical location of wheat trades."],correct:1},
+  {id:88,topic:"Supply & Demand",text:"If the demand for oil shifts up and to the right, and the supply curve is unchanged, the:",options:["price of oil will decrease, and the quantity of oil supplied will decrease.","price of oil will decrease.","there is no change in anything.","price of oil will increase and the quantity of oil sold will increase."],correct:3},
+  {id:89,topic:"Supply & Demand",text:"A drought will:",options:["shift the supply curve for agricultural products upwards and to the left.","increase the quantity of grains supplied.","shift the supply curve downwards to the right.","result in a movement along the supply of grains."],correct:0},
+  {id:90,topic:"Supply & Demand",text:"If income increases, then there is a(n):",options:["upward movement along the beef demand curve.","downward movement along the beef demand curve.","upward shift to the right in beef demand.","downward shift in beef demand."],correct:2},
+  {id:91,topic:"Supply & Demand",text:"When a surplus exists:",options:["market forces will result in a lower price.","market forces will result in a higher price.","equilibrium is found.","market forces will cause a shortage."],correct:0},
+  {id:92,topic:"Supply & Demand",text:"When the price of apples is lower than the equilibrium price:",options:["a surplus occurs.","market forces will decrease the price until equilibrium is reached.","a shortage occurs.","the market is in equilibrium."],correct:2},
+  {id:93,topic:"Supply & Demand",text:"When the price of apples is higher than the equilibrium price:",options:["a surplus occurs.","market forces will increase the price until equilibrium is reached.","a shortage occurs.","the market is in equilibrium."],correct:0},
+  {id:94,topic:"Supply & Demand",text:"Favourable weather results in:",options:["a rightward shift in the supply of wheat.","a leftward shift in the supply of wheat.","a rightward shift in the demand for wheat.","a leftward shift in the demand for wheat."],correct:0},
+  {id:95,topic:"Supply & Demand",text:"If both the demand for and the supply of crayfish increase during the Christmas season, we could expect:",options:["Both the price and quantity of crayfish traded to increase.","The price of crayfish to fall, but the quantity of crayfish traded to increase.","The quantity of crayfish traded to increase, but the equilibrium price may rise or fall or stay the same.","The price of crayfish to increase, but the quantity traded could either increase or decrease."],correct:2},
+  {id:96,topic:"Supply & Demand",text:"If wheat farmers have higher than expected yields, ceteris paribus, then:",options:["the price of wheat will increase.","the price of wheat will decrease.","it just depends on the price of corn.","not enough information to answer."],correct:1},
+  {id:97,topic:"Supply & Demand",text:"Agricultural research results in:",options:["an upward movement along the supply curve of wheat.","a downward movement along the supply curve of wheat.","an outward shift in the supply curve of wheat.","an inward shift in the supply curve of wheat."],correct:2},
+  {id:98,topic:"Supply & Demand",text:"The market supply curve:",options:["slopes up because of diminishing marginal returns.","slopes up because of the Law of Supply and Demand.","slopes up because of economies of scale.","slopes up because of scarcity."],correct:0},
+  {id:99,topic:"Supply & Demand",text:"The ABARES is optimistic that economic growth in emerging economies like China, India and Indonesia will be good for beef producers around the world because:",options:["as people get richer, they eat less meat.","as people get richer, they eat more rice.","as people get richer, they eat more beef.","as people get richer most become vegetarian."],correct:2},
+  {id:100,topic:"Supply & Demand",text:"As consumers get wealthier their demand for farm products changes:",options:["they demand less services added to their food.","they demand waiters service in restaurants is reduced.","they demand higher standards of quality attributes such as products from happy animals whose welfare is not compromised by the conditions of production.","they demand products from animals that are regularly beaten up by slave children."],correct:2},
+  {id:101,topic:"Supply & Demand",text:"A drought that destroys half of all farm crops can be good for some farmers. This is because:",options:["the supply is reduced and price the farmers get for their production goes down.","the supply is increased, and the price goes up.","supply is reduced and the price for the farmers who have supply goes up.","supply is reduced and the price stays the same."],correct:2},
+
+  // ELASTICITY
+  {id:102,topic:"Elasticity",text:"The sensitivity of the quantity demanded of product A to changes in its price is likely to be ____ than the sensitivity of the quantity demanded of product B to changes in its price when there are ____ close substitutes for product A compared with the substitutes there are for product B.",options:["lower; more.","greater; fewer.","greater; more.","greater; far fewer."],correct:2},
+  {id:103,topic:"Elasticity",text:"If the price elasticity of demand for a product is -1.5, a price increase from $1.00 to $1.02 will cause quantity demanded to:",options:["rise by 4 per cent.","rise by 2 per cent.","fall by 3 per cent.","fall by 2 per cent."],correct:2,explanation:"Price increase = 2%. Elasticity = -1.5. Change in Qd = -1.5 \u00d7 2% = -3%."},
+  {id:104,topic:"Elasticity",text:"If a firm lowers the price of its product and finds that total revenue has fallen, this indicates that:",options:["demand for the product is price inelastic.","demand for the product is price elastic.","demand for the product has unit price elasticity.","the demand curve for the product is downward sloping."],correct:0},
+  {id:105,topic:"Elasticity",text:"If a firm raises the price of its product and finds that total revenue has fallen, this indicates that:",options:["demand for the product is price inelastic.","demand for the product has unit price elasticity.","the demand curve for the product is downward sloping.","demand for the product is price elastic."],correct:3},
+  {id:106,topic:"Elasticity",text:"If a firm raises the price of its product and finds that total revenue has increased, this indicates that:",options:["demand for its product is price elastic.","demand for the product has unit price elasticity.","demand for the product is price inelastic.","the demand curve for the product is downward sloping."],correct:2},
+  {id:107,topic:"Elasticity",text:"If the price of a product changes by 10 per cent, and as a result quantity demanded changes by 4 per cent:",options:["demand for the product is price elastic.","revenue will rise if the price change was an increase.","revenue will fall if the price change was an increase.","revenue will rise if the price change was a reduction."],correct:1,explanation:"Elasticity = 4%/10% = 0.4 (inelastic). With inelastic demand, price increase \u2192 revenue increase."},
+  {id:108,topic:"Elasticity",text:"If the demand for a product is price elastic, total revenue will:",options:["be unchanged regardless of the direction of the price change.","fall if price is reduced.","increase if price is increased.","increase if price is reduced."],correct:3},
+  {id:109,topic:"Elasticity",text:"Total revenue will decline if the price ____ when the demand curve ____.",options:["rises; has unit price elasticity.","falls; has unit price elasticity.","rises; is price elastic.","rises; is price inelastic."],correct:2},
+  {id:110,topic:"Elasticity",text:"If the price of a product increases, but the quantity demanded does not decline at all, the demand for this product in this price range:",options:["is perfectly price elastic.","is price elastic.","has a price elasticity of unity.","is price inelastic.","is perfectly price inelastic."],correct:4},
+  {id:111,topic:"Elasticity",text:"If even the smallest increase in the price of a product results in the quantity demanded falling to zero, the demand for this product:",options:["is perfectly price elastic.","is price elastic.","has a price elasticity of unity.","is price inelastic."],correct:0},
+  {id:112,topic:"Elasticity",text:"A vertical demand curve:",options:["is unit price elastic.","is perfectly price elastic.","is price elastic throughout.","is perfectly price inelastic."],correct:3},
+  {id:113,topic:"Elasticity",text:"The magnitude of the price elasticity of demand for a good depends on:",options:["the availability of substitutes.","whether the good is a necessity or a discretionary purchase item.","the length of time over which the price change applies.","all of these factors."],correct:3},
+  {id:114,topic:"Elasticity",text:"If price elasticity of demand is greater than one, an increase in price:",options:["increases total revenue.","total revenue is unchanged.","shifts total revenue.","reduces total revenue."],correct:3},
+  {id:115,topic:"Elasticity",text:"If demand is price inelastic, an increase in price:",options:["increases total revenue.","shifts total revenue.","reduces total revenue.","doubles total revenue."],correct:0},
+  {id:116,topic:"Elasticity",text:"If demand is constant price elasticity (unit elastic), an increase in price:",options:["reduces total revenue.","increases total revenue.","does not change total revenue.","doubles total revenue."],correct:2},
+  {id:117,topic:"Elasticity",text:"If the demand for a product is price inelastic, total revenue will:",options:["increase if price is reduced.","fall if price is increased.","increase if price is increased.","be unchanged regardless of the direction of the price change."],correct:2},
+  {id:118,topic:"Elasticity",text:"Total revenue will increase if the price ____ when the demand curve ____.",options:["falls; is price elastic.","rises; has unit price elasticity.","rises; is price elastic.","falls; is price inelastic."],correct:0},
+  {id:119,topic:"Elasticity",text:"The formula for the price elasticity of supply is the:",options:["percentage change in quantity supplied divided by the percentage change in price.","change in quantity supplied divided by the change in price.","percentage change in price divided by the percentage change in quantity supplied.","change in price divided by the change in quantity supplied."],correct:0},
+  {id:120,topic:"Elasticity",text:"If the price of a product changes by 5 per cent, and as a result the quantity supplied changes by 10 per cent:",options:["this can only be the result of a rightward shift of the supply curve.","supply is price inelastic.","the price elasticity of supply is unity.","supply is price elastic."],correct:3},
+  {id:121,topic:"Elasticity",text:"If the price of a product increases from $5.00 to $5.50 and as a result the quantity supplied increases from 200 to 240, the supply for this product in this price range:",options:["is perfectly price inelastic.","is price inelastic.","has a price elasticity of unity.","is price elastic."],correct:3,explanation:"% change in price = 10%, % change in Qs = 20%. Elasticity = 20%/10% = 2.0 (elastic)."},
+  {id:122,topic:"Elasticity",text:"If supply for a product is perfectly price inelastic, the supply curve is:",options:["horizontal.","upward sloping.","undefined.","downward sloping.","vertical."],correct:4},
+  {id:123,topic:"Elasticity",text:"If supply for a product is perfectly price elastic, the supply curve is:",options:["vertical.","horizontal.","upward sloping.","downward sloping."],correct:1},
+  {id:124,topic:"Elasticity",text:"The price elasticity of supply for a product is normally:",options:["higher in the short run than the long run.","lower in the long run than the short run.","higher in the long run than the short run.","the same in the short run and the long run."],correct:2},
+  {id:125,topic:"Elasticity",text:"If the price of a product increases from $10.00 to $12.00 and as a result the quantity supplied increases from 5000 to 6000, the supply for this product in this price range:",options:["is price elastic.","is perfectly price inelastic.","is price inelastic.","has a price elasticity of unity."],correct:3,explanation:"% change in price = (12-10)/10 = 20%. % change in Qs = (6000-5000)/5000 = 20%. Elasticity = 20%/20% = 1.0 (unit elastic)."},
+  {id:126,topic:"Elasticity",text:"A tax has been levied on a product. The more price inelastic the demand for that product is:",options:["the more likely it is that the biggest share of the tax is borne by consumers.","the greater is the revenue that is raised by the tax.","the smaller is the proportion of the tax borne by consumers.","the lower is the revenue that is raised by the tax."],correct:0},
+  {id:127,topic:"Elasticity",text:"If the price of a product increases from $3.00 to $3.30 and as a result the quantity supplied increases from 200 to 240, the supply for this product in this price range:",options:["is perfectly price inelastic.","is price inelastic.","has a price elasticity of unity.","is price elastic."],correct:3,explanation:"% change in price = 10%, % change in Qs = 20%. Elasticity = 2.0 (elastic)."},
+  {id:128,topic:"Elasticity",text:"Which of the following categories of a foodstuff has the least elastic demand curve?",options:["oranges.","fruit.","food.","apples."],correct:2,explanation:"The broader the category, the fewer substitutes, so the less elastic the demand."},
+  {id:129,topic:"Elasticity",text:"In economics, an elasticity measures:",options:["how prices affect inflation.","the Law of Demand.","how economic variables influence the stock market.","how responsive the quantity of one variable such as quantity demanded is to a change in another variable such as price."],correct:3},
+  {id:130,topic:"Elasticity",text:"The Law of Demand states:",options:["there is a direct relationship between price and quantity demanded.","there is an inverse relationship between price and quantity demanded.","there is no relationship between price and quantity demanded.","the Law of Diminishing Marginal Utility holds."],correct:1},
+  {id:131,topic:"Elasticity",text:"If the price of a good increases 10 percent and the quantity demanded decreases 20 percent, then the price elasticity of demand of the good is:",options:["inelastic.","elastic.","unitary elastic.","not enough information to know."],correct:1,explanation:"Elasticity = 20%/10% = 2.0 (elastic)."},
+  {id:132,topic:"Elasticity",text:"If agricultural supply can be controlled, and demand is price inelastic, then to increase total revenue:",options:["it is necessary to increase the quantity of supply.","it is necessary to improve the quality of supply.","make demand more price elastic.","restrict the supply and increase the price."],correct:3},
+  {id:133,topic:"Elasticity",text:"The elasticity of supply:",options:["decreases over time.","tells how impossible it is to increase food supply.","tells how responsive supply is to changes in weather.","tells how responsive supply is to changes in price."],correct:3},
+  {id:134,topic:"Elasticity",text:"An inelastic supply curve:",options:["has a steep slope.","has a shallow slope.","has a horizontal slope.","changes quantity a lot if price changes a little."],correct:0},
+  {id:135,topic:"Elasticity",text:"If bread supply increases from 10 to 12 million loaves, then using the starting point method, the percentage change in bread supply is equal to:",options:["10%.","0.2%.","20%.","1%."],correct:2},
+  {id:136,topic:"Elasticity",text:"If an officer of an organization that buys and sells Australian wool argues that, at a particular price, a decrease in that wool price will lead to a lower total revenue from wool sales, he or she must believe that the demand for wool within the current price range is:",options:["price elastic.","price inelastic.","price unit elastic.","price perfectly elastic."],correct:1,explanation:"If price decrease \u2192 lower revenue, then demand is inelastic (the quantity increase doesn't compensate for lower price)."},
+
+  // COSTS OF PRODUCTION
+  {id:137,topic:"Costs of Production",text:"The slope of the production function is the:",options:["total products.","average cost.","average product.","marginal costs.","marginal product."],correct:4},
+  {id:138,topic:"Costs of Production",text:"Another name for fixed cost is:",options:["variable cost.","overhead cost.","marginal cost.","proportional cost."],correct:1},
+  {id:139,topic:"Costs of Production",text:"Total cost minus fixed cost equals:",options:["overhead cost.","average variable cost.","average cost.","marginal cost.","variable cost."],correct:4},
+  {id:140,topic:"Costs of Production",text:"The change in total cost when an additional unit of output is produced is the:",options:["overhead cost.","average cost.","average variable cost.","average fixed cost.","marginal cost."],correct:4},
+  {id:141,topic:"Costs of Production",text:"The extra revenue that a firm receives from selling an additional unit of output is its:",options:["net profit.","contribution to costs.","average cost.","marginal revenue.","total revenue."],correct:3},
+  {id:142,topic:"Costs of Production",text:"The amount that the firm receives from selling its products is:",options:["excess profit.","marginal profit.","marginal revenue.","revenue.","profit."],correct:3},
+  {id:143,topic:"Costs of Production",text:"When a firm's output is zero:",options:["Total fixed cost and total variable cost are both zero.","Total variable cost is zero, but total fixed cost may be positive.","Total fixed cost is zero, but total variable cost may be positive.","Both total fixed cost and total variable cost may be positive."],correct:1},
+  {id:144,topic:"Costs of Production",text:"A firm's production function refers to:",options:["The maximum quantity of output that it can produce within a given period.","The maximum revenue it can earn from various levels of output.","The quantities of output that can be produced from various quantities of inputs.","The minimum cost of producing various levels of output."],correct:2},
+  {id:145,topic:"Costs of Production",text:"Profit is:",options:["the difference between marginal cost and price.","the difference between total variable costs and total revenues.","The difference between total revenues and total costs.","the difference between total fixed cost and price."],correct:2},
+  {id:146,topic:"Costs of Production",text:"Marginal cost of a unit of output is equal to:",options:["the added cost of producing an additional unit of output.","the price of a unit of output.","the price of a unit of input.","total cost divided by the total output."],correct:0},
+  {id:147,topic:"Costs of Production",text:"In the long run, if price, average revenue, and marginal revenue of extra output are equal to marginal cost and average total cost of extra input, firms are making normal profit:",options:["because average variable cost includes the opportunity cost of capital which is the normal profit of capital under competition.","because average total cost includes the opportunity cost of capital which is the normal profit of capital under competition.","because accounting profit is being made.","because price equals marginal revenue."],correct:1},
+
+  // PROFIT MAXIMIZATION
+  {id:148,topic:"Profit Maximization",text:"A profit-maximising firm operating in a competitive market will set output such that:",options:["price exceeds marginal cost.","marginal cost exceeds price.","price equals marginal cost.","total cost equals total revenue."],correct:2},
+  {id:149,topic:"Profit Maximization",text:"If a profit-maximising firm operating in a competitive market faces a situation in which marginal revenue exceeds marginal cost, it should:",options:["reduce output.","reduce price.","expand output.","raise price."],correct:2},
+  {id:150,topic:"Profit Maximization",text:"A profit-maximising firm will enter a competitive market if:",options:["marginal revenue exceeds market price.","market price exceeds minimum average total cost.","market price exceeds minimum marginal cost.","marginal revenue exceeds average revenue."],correct:1},
+  {id:151,topic:"Profit Maximization",text:"A firm increases the number of hours its workers are employed from 2000 to 6000, and output increases from 2000 tonnes to 10000 tonnes. The marginal product in tonnes of output for each extra hour of work is:",options:["2","1","100","3000"],correct:0,explanation:"MP = \u0394Output/\u0394Input = (10000-2000)/(6000-2000) = 8000/4000 = 2."},
+  {id:152,topic:"Profit Maximization",text:"In zone 2 of the production response function:",options:["marginal product is negative and decreasing as more input is used.","marginal product is greater than average product.","marginal product is less than average product.","marginal product is positive and increasing as more input is used."],correct:2},
+  {id:153,topic:"Profit Maximization",text:"In the short run the output with minimum average total cost is not the profit maximizing level of output:",options:["because more output increases average cost and reduces profit.","because more profit can be made by producing less output.","because the extra return from extra output exceeds extra cost of extra output and adds to total profit at levels of output beyond the output that gives minimum average total cost.","because the extra return is less than extra costs at levels of output beyond minimum ATC."],correct:2},
+  {id:154,topic:"Profit Maximization",text:"The output level that maximizes profit is found where:",options:["the added revenue from selling an additional unit of output is equal to the additional cost of producing that unit.","the slope of the total cost curve is equal to the slope of the total revenue line.","Marginal Revenue = Marginal Cost.","all of these answers."],correct:3},
+  {id:155,topic:"Profit Maximization",text:"If PY (price of output) increases and all costs of production remain unchanged, the profit-maximizing firm will:",options:["decrease output because it costs more to produce each unit.","will increase output until the new Marginal Revenue is equal to the Marginal Cost of producing it.","will use the same level of inputs.","will produce the same amount of output since the firm is a price taker."],correct:1},
+  {id:156,topic:"Profit Maximization",text:"Corn producers interested in maximising profits should:",options:["Maximise average yield.","Maximise total revenue.","Consider both total costs and total revenue.","Maximize yield."],correct:2},
+  {id:157,topic:"Profit Maximization",text:"If a production process uses the amount of a variable input that produces the maximum average product per unit of the variable input, the producer is using:",options:["the amount of the variable input that will make the maximum total output.","the amount of the variable input that will make most profit.","the minimum of the variable input that should be used as long as the product is worth producing at all.","the maximum of the variable input that should be used if the producer wants to maximize profit."],correct:2},
+  {id:158,topic:"Profit Maximization",text:"One way to measure marginal utility is the amount willingly paid for:",options:["all units except the last one purchased.","all units purchased.","the last unit purchased.","the first unit purchased."],correct:2},
+  {id:159,topic:"Profit Maximization",text:"As an individual's bundle of goods includes more of a particular good, each successive increment yields less additional benefit. This is referred to as:",options:["the race to the bottom.","diminishing total utility.","diminishing marginal utility.","diminishing returns."],correct:2},
+  {id:160,topic:"Profit Maximization",text:"A student is willing to pay $30 for the first T-shirt she buys, $50 for the first two T-shirts, and $60 for the first three T-shirts. The marginal utility of the third T-shirt is:",options:["$100","$45","$25","$10"],correct:3,explanation:"MU of 3rd = Total WTP for 3 - Total WTP for 2 = $60 - $50 = $10."},
+
+  // Pizza restaurant questions
+  {id:161,topic:"Profit Maximization",text:"Below are costs for a pizza restaurant. Price = $20/pizza, TFC = $10.\nY(pizzas): 0,1,2,3,4,5,6,7 | TVC($): 0,20,30,35,42,50,70,100\nThe Average Total Cost of producing 5 pizzas is:",options:["$7","$10","$12","$13"],correct:2,explanation:"TC = TFC + TVC = $10 + $50 = $60. ATC = $60/5 = $12."},
+  {id:162,topic:"Profit Maximization",text:"Using the pizza restaurant data (Price=$20, TFC=$10, TVC: 0,20,30,35,42,50,70,100 for 0\u20137 pizzas), the Marginal Cost of producing a fourth pizza is:",options:["$7","$10","$12","$13"],correct:0,explanation:"MC = TVC(4) - TVC(3) = $42 - $35 = $7."},
+  {id:163,topic:"Profit Maximization",text:"Using the pizza restaurant data (Price=$20, TFC=$10, TVC: 0,20,30,35,42,50,70,100 for 0\u20137 pizzas), the profit-maximizing number of pizzas is:",options:["4","5","6","7"],correct:2,explanation:"MR = $20. MC: 1st=$20, 2nd=$10, 3rd=$5, 4th=$7, 5th=$8, 6th=$20, 7th=$30. Produce where MR\u2265MC, so up to 6 pizzas (MC=$20=MR)."},
+
+  // GOVERNMENT INTERVENTION
+  {id:164,topic:"Government Intervention",text:"Price ceilings, which are legally established prices _____ the equilibrium price, result in _____.",options:["below; shortages.","above; shortages.","below; surpluses.","above; surpluses."],correct:0},
+  {id:165,topic:"Government Intervention",text:"Price floors impose a _______ price.",options:["maximum.","minimum.","suggested.","bracket."],correct:1},
+  {id:166,topic:"Government Intervention",text:"If government sets a regulated price for a product at consumer retail level that is below the current competitive market price this will:",options:["create a surplus of the product.","create a 'black market' with the product trading there at higher prices than the regulated low price.","cause producers to increase production of the product.","increase supply of the product."],correct:1},
+  {id:167,topic:"Government Intervention",text:"Government intervention in the price mechanisms of agricultural product markets has the effect of:",options:["causing drought.","improving price signals for producers and consumers.","distorting price signals to producers and consumers.","improving the welfare of both producers and consumers."],correct:2},
+  {id:168,topic:"Government Intervention",text:"Government intervention to set a minimum price for woolgrowers that is above the current market price will cause:",options:["woolgrowers to produce more wool.","wool consumers to buy less wool.","wool supply to increase and stockpiles to build up.","all of the above."],correct:3},
+  {id:169,topic:"Government Intervention",text:"If government sets a minimum price for milk for dairy farmers:",options:["dairy farmers to produce beef instead of milk.","dairy farmers to produce more milk.","dairy farmers to produce less milk.","impossible to know what effect it will have on dairy farmers without knowing the level at which the minimum price is set."],correct:3},
+  {id:170,topic:"Government Intervention",text:"If government sets a minimum milk price for dairy farmers that is above the medium-term market price, this will:",options:["cause dairy farmers to exit the industry.","cause milk consumers to buy more milk.","cause dairy farmers to increase milk production.","cause dairy farmers to produce less milk."],correct:2},
+  {id:171,topic:"Government Intervention",text:"Which of the following is not one of the four basic household decisions?",options:["How to allocate income.","How much to save.","How much to pay in taxes.","How to invest savings.","How much to work."],correct:2},
+  {id:172,topic:"Government Intervention",text:"In recent years, Australia has expanded exports to, and imports from, China, which has caused:",options:["most Australians to be worse off.","Chinese people getting poorer.","Australia to become unbalanced.","higher levels of income and greater consumption opportunities for most Australians."],correct:3},
+  {id:173,topic:"Government Intervention",text:"The beef cattle industry approximates a perfectly competitive industry. All other variables remaining constant, advances in genetics that increase the lean meat output of beef cattle will, in the long run, lead to:",options:["Lower beef prices.","Hamburgers that are tough to chew.","All beef cattle farmers adopting the new technology.","All the above."],correct:3},
+];
+
+// ESSAY QUESTIONS
+const essays = [
+  {id:"E1",title:"Perfectly Competitive Economic Model",prompt:"Define and explain the tenets of the perfectly competitive economic model. Explain, and show using diagrams and labels, why economists argue that competition between producers and consumers will allocate scarce resources efficiently.",hints:"Key tenets: many buyers/sellers, homogeneous products, free entry/exit, perfect information, price-taking behaviour. Efficiency: In equilibrium, P = MC (allocative efficiency). Consumer and producer surplus are maximized. Use supply-demand diagram showing equilibrium where S=D. At equilibrium, no deadweight loss exists. Resources flow to highest-valued uses through price signals."},
+  {id:"E2",title:"Market Conditions",prompt:"Markets work under particular set of conditions. What are these conditions? What do economists mean when they argue that markets 'work'?",hints:"Conditions: well-defined property rights, competitive markets (many buyers/sellers), perfect information, no externalities, no public goods problems. Markets 'work' means they achieve allocative efficiency (resources go to highest-valued uses), productive efficiency (lowest cost production), and maximize total surplus (consumer + producer surplus)."},
+  {id:"E3",title:"General Equilibrium & Basic Economic Questions",prompt:"How does the economy in general equilibrium answer the four basic economic questions: What is produced, and in what quantities, how are these goods produced, and for whom are they produced? Who makes the economic decisions?",hints:"What: determined by consumer demand and willingness to pay. How much: where supply meets demand. How: firms choose least-cost production methods. For whom: determined by income distribution and willingness to pay. Decisions are decentralized \u2014 made by millions of individual consumers and firms responding to price signals (the invisible hand)."},
+  {id:"E4",title:"Price Floors & Wool Reserve Price Scheme",prompt:"Why do price floors lead to surpluses? Draw a diagram of the effect of the Australian Wool Reserve Price Scheme. What was this scheme intended to achieve?",hints:"Price floor above equilibrium: Qs > Qd = surplus. Diagram: horizontal line above equilibrium showing floor price, with surplus between Qs and Qd. Australian Wool Reserve Price Scheme: government set minimum price for wool above market price. Intended to stabilize woolgrower income and prevent price crashes. Result: massive wool stockpile accumulated, eventually the scheme collapsed in 1991 when stockpile became unsustainable."},
+  {id:"E5",title:"Price Ceilings & Price Floors",prompt:"Define price ceiling and price floor (include examples and appropriate diagram). Which leads to a shortage? Which leads to a surplus? Why?",hints:"Price ceiling: maximum legal price (below equilibrium). Example: rent controls. Leads to shortage because Qd > Qs at the low price. Price floor: minimum legal price (above equilibrium). Example: minimum wage, agricultural price supports. Leads to surplus because Qs > Qd at the high price. Draw S-D diagrams for each showing the gap between Qs and Qd."},
+  {id:"E6",title:"Rent Controls",prompt:"Rent controls have unintended effects. Explain these possible effects.",hints:"Short-run: tenants benefit from lower rents. Long-run effects: reduced housing supply (builders have less incentive), deterioration of existing housing (landlords reduce maintenance), shortages and long waiting lists, black markets, reduced mobility (tenants won't give up cheap apartments), misallocation (people stay in wrong-sized apartments), discrimination by landlords choosing tenants by non-price criteria."},
+  {id:"E7",title:"Price Elasticity & Business Decisions",prompt:"'The concept of price elasticity of demand is the key to people running businesses making profitable decisions about setting and changing prices of the products they sell'. Explain this statement.",hints:"If demand is elastic (|Ed|>1): lowering price increases total revenue. If inelastic (|Ed|<1): raising price increases total revenue. Unit elastic: price changes don't affect TR. Businesses need to know their elasticity to set prices profitably. Factors affecting elasticity: substitutes, necessity vs luxury, proportion of income, time horizon. Example: essential medicines (inelastic) vs luxury goods (elastic)."},
+  {id:"E8",title:"Elasticity & Total Revenue",prompt:"Explain how changes in price elasticities of demand change total revenue, and how you would use this information to set your prices if you were a business person.",hints:"Elastic demand: price cut \u2192 TR rises, price increase \u2192 TR falls. Inelastic demand: price cut \u2192 TR falls, price increase \u2192 TR rises. Unit elastic: TR unchanged. Business strategy: if your product has inelastic demand, raise prices. If elastic, consider lowering prices to increase volume. Invest in brand differentiation to make demand more inelastic. Consider time horizons \u2014 demand becomes more elastic over time as consumers find substitutes."},
+  {id:"E9",title:"Income Elasticity & Business Strategy",prompt:"'To make a fortune, a clever entrepreneur will produce goods whose demand is income elastic during periods of prosperity but will switch to producing lower value goods during periods of depression.' Is this statement valid? Explain.",hints:"Valid statement. Income elastic goods (luxury goods, Ey>1): demand rises more than proportionally with income \u2192 great during prosperity. During recession, demand for income elastic goods falls sharply. Inferior goods (Ey<0): demand rises when income falls. Normal necessities (0<Ey<1): demand is stable. Strategy: produce luxury goods in booms, switch to necessities/inferior goods in recessions. Examples: fine dining vs fast food, designer clothing vs discount stores."},
+  {id:"E10",title:"Good News for Farming, Bad News for Farmers",prompt:"Can good news for farming be bad news for farmers? New hybrid of wheat is more productive than those in the past. What would happen to: Wheat Supply? Wheat Demand? Revenue if wheat demand is inelastic? Revenue if wheat demand is elastic?",hints:"New hybrid shifts supply right. Demand unchanged (consumer preferences haven't changed). Price falls. If demand is inelastic (which food typically is): quantity increase < price decrease proportionally \u2192 total revenue FALLS. Farmers are worse off despite higher yields! If demand is elastic: quantity increase > price decrease proportionally \u2192 total revenue rises. Key insight: with inelastic demand, increased supply hurts farmers' total revenue \u2014 the 'paradox of plenty.'"},
+  {id:"E11",title:"Cigarette Market",prompt:"Cigarette market: Assume that the demand curve for cigarettes is highly inelastic and the supply curve for cigarettes is highly elastic. Describe characteristics of the cigarette market which would determine a highly inelastic demand curve and elastic supply curve. If the tastes of the public shift away from smoking, will the effect be larger on price or on quantity?",hints:"Inelastic demand because: addictive nature, few close substitutes, habitual consumption, small share of budget. Elastic supply because: tobacco is easily grown, manufacturing is straightforward, producers can adjust output relatively easily. If tastes shift away (demand shifts left) with elastic supply and inelastic demand: the effect is larger on QUANTITY than on price. With elastic supply, producers adjust quantity significantly in response to price changes, so the leftward shift in demand reduces quantity traded substantially but price doesn't fall much."},
+  {id:"E12",title:"Basic Economic Questions & Factors of Production",prompt:"What are the basic economic questions? List the Factors of Production.",hints:"Basic economic questions: (1) What to produce and how much? (2) How to produce? (3) For whom to produce? (4) Who makes the decisions? Factors of Production: (1) Land \u2014 natural resources, (2) Labour \u2014 human effort, physical and mental, (3) Capital \u2014 manufactured goods used in production (machines, tools, buildings), (4) Entrepreneurship \u2014 organizing other factors, bearing risk, innovating. Note: money is NOT a factor of production."},
+  {id:"E13",title:"Circular Flow Model",prompt:"Draw and Label the Circular Flow Model of the Economy.",hints:"Two main actors: Households and Firms. Two markets: Product (goods/services) market and Factor (resource) market. Flows: (1) Households supply factors to firms through factor market, receive income (wages, rent, interest, profit). (2) Firms supply goods/services to households through product market, receive revenue. (3) Money flows clockwise, real goods/factors flow counterclockwise. Optional additions: government (taxes, transfers, spending), financial sector (savings, investment), foreign sector (imports, exports)."},
+  {id:"E14",title:"Cost Definitions",prompt:"Define fixed costs, total variable costs, average variable costs, average total costs, marginal costs, marginal revenue.",hints:"Fixed Costs (FC): costs that don't change with output level (rent, insurance). Total Variable Costs (TVC): costs that change with output (raw materials, labour). Average Variable Cost (AVC) = TVC/Q. Average Total Cost (ATC) = TC/Q = AFC + AVC. Marginal Cost (MC) = change in TC from producing one more unit = \u0394TC/\u0394Q. Marginal Revenue (MR) = additional revenue from selling one more unit = \u0394TR/\u0394Q."},
+  {id:"E15",title:"Production Function",prompt:"Draw a typical production function, label the axes, and show stages I, II and III.",hints:"X-axis: Variable input (e.g., labour). Y-axis: Total Product (output). S-shaped curve (increasing then decreasing returns). Stage I: From origin to where AP is maximum. MP > AP. Not rational \u2014 could produce more efficiently. Stage II: From max AP to where MP = 0 (max TP). MP < AP but MP > 0. Rational operating zone. Stage III: Beyond max TP. MP is negative. Not rational \u2014 using too much input."},
+  {id:"E16",title:"Economic Profit",prompt:"Describe the concept of economic profit. Draw a picture of economic profits, fully label the axes and all curves on the diagram.",hints:"Economic profit = Total Revenue - Total Economic Cost (including opportunity costs). Different from accounting profit which only considers explicit costs. Diagram: X-axis = Quantity, Y-axis = Price/Cost. Show MC curve (U-shaped), ATC curve (U-shaped), demand/price line (horizontal for competitive firm). Economic profit = shaded rectangle between P line and ATC at profit-maximizing output (where P=MC). Height = P - ATC, Width = Q."},
+  {id:"E17",title:"Managing Output Decisions",prompt:"You are managing a business. The financial team have provided information about the expected costs and revenue. Which information about costs and revenue will be most useful in helping you decide how much output to produce?",hints:"Most useful: Marginal Cost (MC) and Marginal Revenue (MR). Produce where MR = MC for profit maximization. If MR > MC, produce more (each additional unit adds to profit). If MR < MC, produce less (each additional unit reduces profit). Total cost/revenue tell you overall profitability, but MC and MR tell you the OPTIMAL level of output. Also need to check: Is P > AVC? (short-run shutdown condition). Is P > ATC? (long-run viability)."},
+  {id:"E18",title:"High Prices & Industry Expansion",prompt:"'High prices traditionally cause expansion in an industry, eventually bringing an end to high prices and manufacturers' prosperity.' Explain using appropriate diagrams.",hints:"Short-run: High price (above ATC) \u2192 economic profits for existing firms (P > ATC). Long-run: Economic profits attract new firms to enter the industry. Entry increases market supply (supply shifts right). Increased supply drives price down. Entry continues until economic profits = 0 (P = ATC). Diagram 1: Individual firm showing profit at initial high price. Diagram 2: Market S-D showing supply shift right. Diagram 3: Individual firm at new long-run equilibrium with zero economic profit."},
+  {id:"E19",title:"Long-Run Competitive Equilibrium",prompt:"In the long run with free entry and exit, is the price in a market equal to marginal cost, average total cost, both or neither? Explain with a diagram.",hints:"BOTH. In long-run competitive equilibrium: P = MC (profit maximization condition) AND P = ATC (zero economic profit condition). This occurs at the minimum of the ATC curve, where MC crosses ATC. Diagram: Show MC and ATC curves for individual firm. MC crosses ATC at minimum ATC. Price line is tangent to ATC at its minimum. This is both allocatively efficient (P=MC) and productively efficient (producing at minimum ATC)."},
+  {id:"E20",title:"Fishing Production Function & Costs",prompt:"A commercial fisherman notices the following relationship between hours spent fishing and the quantity of fish caught: 0hrs=0, 1hr=10, 2hrs=18, 3hrs=24, 4hrs=28, 5hrs=30. What is the marginal product of each hour? Graph the production function. The fisherman has fixed cost of $10, opportunity cost of time is $5/hr. Graph total cost curve.",hints:"Marginal Products: 1st hr=10, 2nd hr=8, 3rd hr=6, 4th hr=4, 5th hr=2. Diminishing marginal returns throughout. Production function: concave shape (increasing at decreasing rate). Total Cost: TC = FC + VC = $10 + ($5 \u00d7 hours). TC at 0hrs=$10, 1hr=$15, 2hrs=$20, 3hrs=$25, 4hrs=$30, 5hrs=$35. TC curve is linear because wage rate is constant. But TC as a function of OUTPUT would be convex (increasing at increasing rate) due to diminishing MP."},
+];
+
+// ==================== TOPICS ====================
+const topics = [...new Set(questions.map(q=>q.topic))];
+const letters = ['A','B','C','D','E'];
+
+// ==================== STATE ====================
+let state = loadState();
+let quizState = null;
+let timerInterval = null;
+let essayTimerInterval = null;
+
+function defaultState(){
+  return {
+    attempted:{},  // {qid: {answered:true, correct:bool, selectedOption:int}}
+    topicScores:{}, // {topic: {correct:0, attempted:0}}
+    bestStreak:0,
+    currentStreak:0,
+    settings:{shuffle:false,timer:false,mcqTime:1200,essayTime:2400}
+  };
+}
+function loadState(){
+  try{
+    const s = JSON.parse(localStorage.getItem('agri20042_state'));
+    if(s) return {...defaultState(),...s};
+  }catch(e){}
+  return defaultState();
+}
+function saveState(){localStorage.setItem('agri20042_state',JSON.stringify(state))}
+function resetAll(){
+  if(!confirm('Reset all progress? This cannot be undone.')) return;
+  state = defaultState();
+  saveState();
+  renderDashboard();
+  showPage('dashboard');
+}
+function toggleSetting(el,key){
+  el.classList.toggle('active');
+  state.settings[key] = el.classList.contains('active');
+  saveState();
+}
+function saveSetting(key,val){
+  state.settings[key] = parseInt(val);
+  saveState();
+}
+
+// ==================== NAVIGATION ====================
+function showPage(page, topic){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn[data-page="'+page+'"]').forEach(b=>{
+    if(!topic || b.dataset.topic === topic) b.classList.add('active');
+  });
+  if(page==='dashboard') renderDashboard();
+  if(page==='quiz'){
+    if(topic){
+      startQuizForTopic(topic);
+    } else if(!quizState){
+      resetQuizUI();
+    }
+  }
+  if(page==='review') renderReview();
+  if(page==='essays') renderEssays();
+  if(page==='changelog') renderChangelog();
+  if(page==='settings') loadSettings();
+  closeSidebar();
+}
+
+document.querySelectorAll('.nav-btn[data-page]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    showPage(btn.dataset.page, btn.dataset.topic);
+  });
+});
+
+// Sidebar mobile
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+const menuToggle = document.getElementById('menuToggle');
+menuToggle.addEventListener('click',()=>{sidebar.classList.toggle('open');overlay.classList.toggle('show')});
+overlay.addEventListener('click',closeSidebar);
+function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('show')}
+
+// Reset
+document.getElementById('resetBtn').addEventListener('click',resetAll);
+
+// ==================== DASHBOARD ====================
+function renderDashboard(){
+  const allAttempted = Object.keys(state.attempted).length;
+  const allCorrect = Object.values(state.attempted).filter(a=>a.correct).length;
+  const acc = allAttempted ? Math.round(allCorrect/allAttempted*100) : 0;
+  document.getElementById('statAttempted').textContent = allAttempted;
+  document.getElementById('statCorrect').textContent = allCorrect;
+  document.getElementById('statAccuracy').textContent = acc+'%';
+  document.getElementById('statStreak').textContent = state.bestStreak||0;
+
+  const list = document.getElementById('topicProgressList');
+  list.innerHTML = '';
+  topics.forEach(t=>{
+    const tqs = questions.filter(q=>q.topic===t);
+    const ts = state.topicScores[t]||{correct:0,attempted:0};
+    const pct = ts.attempted ? Math.round(ts.correct/ts.attempted*100) : 0;
+    const coverage = Math.round(ts.attempted/tqs.length*100);
+    const row = document.createElement('div');
+    row.className = 'topic-row';
+    row.onclick = ()=> showPage('quiz',t);
+    row.innerHTML = `
+      <div class="topic-name">${t}</div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${coverage}%"></div></div>
+      <div class="topic-score">${ts.attempted}/${tqs.length} &middot; ${pct}%</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+// ==================== QUIZ ====================
+function resetQuizUI(){
+  quizState = null;
+  stopTimer();
+  document.getElementById('quizStart').style.display = '';
+  document.getElementById('quizActive').style.display = 'none';
+  document.getElementById('quizComplete').style.display = 'none';
+  renderQuizTopicChips();
+}
+
+function renderQuizTopicChips(){
+  const container = document.getElementById('quizTopicChips');
+  container.innerHTML = '<button class="chip active" data-topic="all">All Topics ('+questions.length+')</button>';
+  topics.forEach(t=>{
+    const c = questions.filter(q=>q.topic===t).length;
+    container.innerHTML += `<button class="chip" data-topic="${t}">${t} (${c})</button>`;
+  });
+  container.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      container.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+}
+
+function startQuizForTopic(topic){
+  // Pre-select topic and start
+  resetQuizUI();
+  const container = document.getElementById('quizTopicChips');
+  container.querySelectorAll('.chip').forEach(c=>{
+    c.classList.remove('active');
+    if(c.dataset.topic === topic) c.classList.add('active');
+  });
+  startQuiz();
+}
+
+document.getElementById('startQuizBtn').addEventListener('click',startQuiz);
+document.getElementById('submitAnswerBtn').addEventListener('click',submitAnswer);
+document.getElementById('nextQuestionBtn').addEventListener('click',nextQuestion);
+document.getElementById('endQuizBtn').addEventListener('click',endQuiz);
+
+function startQuiz(){
+  const activeChip = document.querySelector('#quizTopicChips .chip.active');
+  const selectedTopic = activeChip ? activeChip.dataset.topic : 'all';
+  const shuffle = document.getElementById('toggleShuffle').classList.contains('active');
+  const useTimer = document.getElementById('toggleTimer').classList.contains('active');
+
+  let qs = selectedTopic === 'all' ? [...questions] : questions.filter(q=>q.topic===selectedTopic);
+  if(shuffle) qs = shuffleArray(qs);
+
+  quizState = {
+    questions: qs,
+    current: 0,
+    score: 0,
+    selectedOption: null,
+    submitted: false,
+    useTimer,
+    timeLeft: state.settings.mcqTime || 1200,
+    topicLabel: selectedTopic === 'all' ? 'All Topics' : selectedTopic
+  };
+
+  document.getElementById('quizSubtitle').textContent = quizState.topicLabel;
+  document.getElementById('quizStart').style.display = 'none';
+  document.getElementById('quizActive').style.display = '';
+  document.getElementById('quizComplete').style.display = 'none';
+
+  if(useTimer){
+    document.getElementById('quizTimerDisplay').style.display = '';
+    startTimer();
+  } else {
+    document.getElementById('quizTimerDisplay').style.display = 'none';
+  }
+
+  renderQuestion();
+}
+
+function renderQuestion(){
+  if(!quizState || quizState.current >= quizState.questions.length){
+    endQuiz();
+    return;
+  }
+  const q = quizState.questions[quizState.current];
+  quizState.selectedOption = null;
+  quizState.submitted = false;
+
+  const total = quizState.questions.length;
+  const pos = quizState.current + 1;
+  document.getElementById('quizPosText').textContent = `Question ${pos} of ${total}`;
+  document.getElementById('quizScoreText').textContent = `Score: ${quizState.score}/${quizState.current}`;
+  document.getElementById('quizProgressFill').style.width = (pos/total*100)+'%';
+
+  const container = document.getElementById('questionContainer');
+  container.innerHTML = `
+    <div class="question-card">
+      <div class="question-topic">${q.topic}</div>
+      <div class="question-number">Question ${q.id}</div>
+      <div class="question-text">${q.text.replace(/\n/g,'<br>')}</div>
+      <ul class="options-list" id="optionsList">
+        ${q.options.map((opt,i)=>`
+          <li class="option-item" data-idx="${i}">
+            <div class="option-radio"></div>
+            <span class="option-letter">${letters[i]}.</span>
+            <span class="option-text">${opt}</span>
+          </li>
+        `).join('')}
+      </ul>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  `;
+
+  document.querySelectorAll('#optionsList .option-item').forEach(li=>{
+    li.addEventListener('click',()=>{
+      if(quizState.submitted) return;
+      document.querySelectorAll('#optionsList .option-item').forEach(o=>o.classList.remove('selected'));
+      li.classList.add('selected');
+      quizState.selectedOption = parseInt(li.dataset.idx);
+      document.getElementById('submitAnswerBtn').disabled = false;
+    });
+  });
+
+  document.getElementById('submitAnswerBtn').disabled = true;
+  document.getElementById('submitAnswerBtn').style.display = '';
+  document.getElementById('nextQuestionBtn').style.display = 'none';
+}
+
+function submitAnswer(){
+  if(quizState.submitted || quizState.selectedOption === null) return;
+  quizState.submitted = true;
+  const q = quizState.questions[quizState.current];
+  const isCorrect = quizState.selectedOption === q.correct;
+
+  if(isCorrect) quizState.score++;
+
+  // Update state
+  state.attempted[q.id] = {answered:true, correct:isCorrect, selectedOption:quizState.selectedOption};
+  if(!state.topicScores[q.topic]) state.topicScores[q.topic] = {correct:0,attempted:0};
+  state.topicScores[q.topic].attempted++;
+  if(isCorrect) state.topicScores[q.topic].correct++;
+
+  if(isCorrect){
+    state.currentStreak = (state.currentStreak||0)+1;
+    if(state.currentStreak > (state.bestStreak||0)) state.bestStreak = state.currentStreak;
+  } else {
+    state.currentStreak = 0;
+  }
+  saveState();
+
+  // Show feedback
+  const items = document.querySelectorAll('#optionsList .option-item');
+  items.forEach((li,i)=>{
+    li.style.cursor = 'default';
+    if(i === q.correct) li.classList.add('correct');
+    if(i === quizState.selectedOption && !isCorrect) li.classList.add('incorrect');
+    if(i === q.correct && i !== quizState.selectedOption) li.classList.add('reveal-correct');
+  });
+
+  const fb = document.getElementById('feedback');
+  if(isCorrect){
+    fb.className = 'feedback correct';
+    fb.innerHTML = '<strong>Correct!</strong>';
+  } else {
+    fb.className = 'feedback incorrect';
+    fb.innerHTML = `<strong>Incorrect</strong> The correct answer is ${letters[q.correct]}. ${q.options[q.correct]}`;
+  }
+  if(q.explanation){
+    fb.innerHTML += `<div class="explanation">${q.explanation}</div>`;
+  }
+
+  document.getElementById('submitAnswerBtn').style.display = 'none';
+  document.getElementById('nextQuestionBtn').style.display = '';
+  document.getElementById('quizScoreText').textContent = `Score: ${quizState.score}/${quizState.current+1}`;
+}
+
+function nextQuestion(){
+  quizState.current++;
+  if(quizState.current >= quizState.questions.length){
+    endQuiz();
+  } else {
+    renderQuestion();
+  }
+}
+
+function endQuiz(){
+  stopTimer();
+  if(!quizState) return;
+  const total = quizState.current + (quizState.submitted ? 0 : -1);
+  const realTotal = Math.max(total+1, quizState.submitted ? quizState.current+1 : quizState.current);
+  const attempted = Object.keys(state.attempted).length;
+  const pct = realTotal > 0 ? Math.round(quizState.score/realTotal*100) : 0;
+
+  document.getElementById('quizActive').style.display = 'none';
+  document.getElementById('quizComplete').style.display = '';
+  document.getElementById('finalPct').textContent = pct+'%';
+
+  let msg = 'Quiz Complete!';
+  if(pct >= 90) msg = 'Excellent Work!';
+  else if(pct >= 70) msg = 'Good Job!';
+  else if(pct >= 50) msg = 'Keep Practicing!';
+  else msg = 'More Study Needed';
+
+  document.getElementById('finalMsg').textContent = msg;
+  document.getElementById('finalDetail').textContent = `You answered ${quizState.score} out of ${realTotal} correctly.`;
+
+  // Update score circle color
+  const circle = document.querySelector('.score-circle');
+  if(pct >= 70) circle.style.borderColor = 'var(--green)';
+  else if(pct >= 50) circle.style.borderColor = 'var(--amber)';
+  else circle.style.borderColor = 'var(--red)';
+  document.querySelector('.score-circle .pct').style.color = circle.style.borderColor;
+}
+
+// Timer
+function startTimer(){
+  updateTimerDisplay();
+  timerInterval = setInterval(()=>{
+    quizState.timeLeft--;
+    updateTimerDisplay();
+    if(quizState.timeLeft <= 0){
+      stopTimer();
+      endQuiz();
+    }
+  },1000);
+}
+function stopTimer(){if(timerInterval){clearInterval(timerInterval);timerInterval=null}}
+function updateTimerDisplay(){
+  const t = quizState.timeLeft;
+  const m = Math.floor(t/60);
+  const s = t%60;
+  const el = document.getElementById('quizTimerDisplay');
+  el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  el.classList.toggle('danger', t < 120);
+}
+
+// ==================== REVIEW ====================
+function renderReview(){
+  const container = document.getElementById('reviewTopicChips');
+  container.innerHTML = '<button class="chip active" data-topic="all">All</button>';
+  topics.forEach(t=>{
+    container.innerHTML += `<button class="chip" data-topic="${t}">${t}</button>`;
+  });
+  container.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      container.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      renderReviewList(chip.dataset.topic);
+    });
+  });
+  renderReviewList('all');
+}
+
+function renderReviewList(topic){
+  const list = document.getElementById('reviewList');
+  const qs = topic==='all' ? questions : questions.filter(q=>q.topic===topic);
+  list.innerHTML = qs.map(q=>{
+    const userAns = state.attempted[q.id];
+    return `
+    <div class="review-item">
+      <div class="q-head">
+        <span class="q-topic">${q.topic}</span>
+        <span class="q-num">Q${q.id} ${userAns ? (userAns.correct ? '<span style="color:var(--green)">&#10003;</span>' : '<span style="color:var(--red)">&#10007;</span>') : ''}</span>
+      </div>
+      <div class="q-text">${q.text.replace(/\n/g,'<br>')}</div>
+      ${q.options.map((opt,i)=>`
+        <div class="review-option ${i===q.correct?'is-correct':''}">
+          <span class="opt-letter">${letters[i]}.</span>
+          <span>${opt}${i===q.correct?' &#10003;':''}</span>
+        </div>
+      `).join('')}
+      ${q.explanation ? `<div class="review-explanation">${q.explanation}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ==================== ESSAYS ====================
+function renderEssays(){
+  const list = document.getElementById('essayList');
+  list.innerHTML = essays.map(e=>`
+    <div class="essay-card" id="essay-${e.id}">
+      <div class="essay-header" onclick="toggleEssay('${e.id}')">
+        <h3>${e.id}: ${e.title}</h3>
+        <span class="arrow">&#9662;</span>
+      </div>
+      <div class="essay-body">
+        <p style="line-height:1.7;color:var(--text2)">${e.prompt}</p>
+        <div class="essay-hint-btn" onclick="toggleHints('${e.id}')">Show Model Answer Hints</div>
+        <div class="essay-hints" id="hints-${e.id}">${e.hints}</div>
+      </div>
+    </div>
+  `).join('');
+}
+function toggleEssay(id){
+  document.getElementById('essay-'+id).classList.toggle('open');
+}
+function toggleHints(id){
+  document.getElementById('hints-'+id).classList.toggle('show');
+}
+
+// Essay timer
+document.getElementById('essayTimerBtn').addEventListener('click',startEssayTimer);
+function startEssayTimer(){
+  let timeLeft = state.settings.essayTime || 2400;
+  document.getElementById('essayTimerDisplay').style.display = '';
+  document.getElementById('essayTimerStop').style.display = '';
+  essayTimerInterval = setInterval(()=>{
+    timeLeft--;
+    const m = Math.floor(timeLeft/60);
+    const s = timeLeft%60;
+    const el = document.getElementById('essayTimerDisplay');
+    el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    el.classList.toggle('danger', timeLeft < 120);
+    if(timeLeft<=0){
+      stopEssayTimer();
+      alert('Time is up!');
+    }
+  },1000);
+}
+function stopEssayTimer(){
+  clearInterval(essayTimerInterval);
+  document.getElementById('essayTimerDisplay').style.display = 'none';
+  document.getElementById('essayTimerStop').style.display = 'none';
+}
+
+// ==================== SETTINGS ====================
+function loadSettings(){
+  const s = state.settings;
+  document.getElementById('settingShuffle').classList.toggle('active',!!s.shuffle);
+  document.getElementById('settingTimer').classList.toggle('active',!!s.timer);
+  document.getElementById('settingMcqTime').value = s.mcqTime||1200;
+  document.getElementById('settingEssayTime').value = s.essayTime||2400;
+}
+
+// ==================== UTILS ====================
+function shuffleArray(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+// ==================== VERSION HISTORY ====================
+const APP_VERSION = '1.0.0';
+const changelog = [
+  {
+    version: '1.0.0',
+    date: '2026-04-15',
+    title: 'Initial Release',
+    changes: [
+      {type:'added', text:'173 MCQ questions across 11 agricultural economics topics'},
+      {type:'added', text:'20 essay/short answer practice prompts with model answer hints'},
+      {type:'added', text:'Dashboard with progress tracking and per-topic stats'},
+      {type:'added', text:'Quiz mode with immediate feedback and explanations'},
+      {type:'added', text:'Topic-based filtering from sidebar and quiz start screen'},
+      {type:'added', text:'Review mode showing all questions with correct answers revealed'},
+      {type:'added', text:'Configurable MCQ timer (10/20/30/40 min) for exam simulation'},
+      {type:'added', text:'Essay timer (20/40/60 min)'},
+      {type:'added', text:'Shuffle toggle to randomize question order'},
+      {type:'added', text:'LocalStorage persistence for scores and settings across sessions'},
+      {type:'added', text:'Dark theme with emerald accents, responsive sidebar for mobile'},
+      {type:'added', text:'Version history tracking page'},
+    ]
+  }
+];
+
+function renderChangelog(){
+  const current = changelog[0];
+  document.getElementById('currentVersionNum').textContent = 'v' + current.version;
+  document.getElementById('currentVersionDate').textContent = formatChangelogDate(current.date);
+
+  const container = document.getElementById('changelogTimeline');
+  const legend = `<div class="change-type-legend">
+    <span class="legend-added">Added</span>
+    <span class="legend-changed">Changed</span>
+    <span class="legend-fixed">Fixed</span>
+    <span class="legend-removed">Removed</span>
+  </div>`;
+
+  container.innerHTML = legend + changelog.map((entry,i) => `
+    <div class="changelog-entry${i===0?' latest':''}">
+      <div class="version-header">
+        <span class="version-tag">v${entry.version}</span>
+        <span class="version-date">${formatChangelogDate(entry.date)}</span>
+      </div>
+      <div class="version-title">${entry.title}</div>
+      <ul class="change-list">
+        ${entry.changes.map(c => `<li class="${c.type}">${c.text}</li>`).join('')}
+      </ul>
+    </div>
+  `).join('');
+}
+
+function formatChangelogDate(dateStr){
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-AU',{year:'numeric',month:'long',day:'numeric'});
+}
+
+// ==================== INIT ====================
+renderDashboard();
+renderQuizTopicChips();
+document.getElementById('sidebarVersion').textContent = 'v' + APP_VERSION;
+
+// Load saved toggle states
+if(state.settings.shuffle) document.getElementById('toggleShuffle').classList.add('active');
+if(state.settings.timer) document.getElementById('toggleTimer').classList.add('active');
+</script>
+</body>
+</html>
